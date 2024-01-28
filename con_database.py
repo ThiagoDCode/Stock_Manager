@@ -18,11 +18,11 @@ def dml_database(query, i):
         messagebox.showinfo("Successfully", message="Registro realizado com sucesso!")
 
 
-def dql_database(query, i):
+def dql_database(query):
     try:
         with connection:
             con = connection.cursor()
-            con.execute(query, i)
+            con.execute(query)
             response = con.fetchall()
     except Error as e:
         messagebox.showerror(f"{e}", message="Não foi possível encontrar o registro!")

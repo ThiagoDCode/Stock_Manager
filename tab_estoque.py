@@ -7,7 +7,7 @@ from con_database import *
 
 
 class Register:
-    
+
     def variables(self):
         self.produto = self.produto_entry.get()
         self.medida = self.medida_entry.get()
@@ -18,8 +18,7 @@ class Register:
         self.fone1 = self.fone1_entry.get()
         self.fone2 = self.fone2_entry.get()
         self.nf = self.nf_entry.get()
-    
-    
+
     def clear_entries(self):
         self.produto_entry.delete(0, END)
         self.medida_entry.delete(0, END)
@@ -30,25 +29,39 @@ class Register:
         self.fone1_entry.delete(0, END)
         self.fone2_entry.delete(0, END)
         self.nf_entry.delete(0, END)
-    
-    
+
     def register_product(self):
         self.variables()
-        
+
         if self.produto_entry.get() == "":
-            messagebox.showinfo("Aviso", message="Insira a descrição do produto!")
-        
+            messagebox.showinfo(
+                "Aviso", message="Insira a descrição do produto!")
+
         else:
             try:
                 query_sql = """
                     INSERT INTO estoque (produto, medida, grupo, est_mín, fornecedor, responsável, fone_1, fone_2, NF)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) """
-                lista_dados = [self.produto, self.medida, self.grupo, self.min, self.fornecedor, self.resp, self.fone1, self.fone2, self.nf]
-                
+                lista_dados = [self.produto, self.medida, self.grupo, self.min,
+                               self.fornecedor, self.resp, self.fone1, self.fone2, self.nf]
+
                 dml_database(query_sql, lista_dados)
-            
+
             except Error as e:
-                messagebox.showerror(f"{e}", message="Não foi possível realizar o registro!")
+                messagebox.showerror(
+                    f"{e}", message="Não foi possível realizar o registro!")
             else:
                 self.clear_entries()
+                self.listar_dados()
 
+    def listar_dados(self):
+        self.lista_produtos.delete(*self.lista_produtos.get_children())
+
+        query_sql = """
+            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín 
+            FROM estoque
+        """
+        return_dados = dql_database(query_sql)
+
+        for dado in return_dados:
+            self.lista_produtos.insert("", END, values=dado)
