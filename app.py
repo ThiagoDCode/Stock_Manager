@@ -63,7 +63,7 @@ class TabEstoque(Register):
         btn_update = ctk.CTkButton(self.root, text="Atualizar", command=self.update_product)
         btn_update.grid(column=2, row=0, padx=5)
 
-        btn_delete = ctk.CTkButton(self.root, text="Excluir")
+        btn_delete = ctk.CTkButton(self.root, text="Excluir", command=self.delete_product)
         btn_delete.grid(column=3, row=0)
 
     def widgets_top(self):
@@ -138,6 +138,9 @@ class TabEstoque(Register):
 
         ctk.CTkLabel(self.frame_top, text="IMAGEM", width=220,
                      height=190, bg_color="#808080").place(x=765, y=5)
+        
+        ctk.CTkLabel(self.frame_top, text="Dobro click para selecionar um produto!", 
+                     font=("Cascadia Code", 12, "bold")).place(x=10, y=175)
 
     def widgets_bottom(self):
         self.frame_bottom = ctk.CTkFrame(

@@ -84,7 +84,7 @@ class Register(functions):
     def update_product(self):
         self.variables()
         
-        if self.código == "":
+        if self.código == "" or not self.código.isdigit():
             messagebox.showerror("ID invalid", message="Informe o código do produto a ser atualizado!")
         else:
             if self.produto == "":
@@ -102,3 +102,15 @@ class Register(functions):
             
                 self.clear_entries()
                 self.select_database()
+    
+    def delete_product(self):
+        self.variables()
+        
+        if self.código == "" or not self.código.isdigit():
+            messagebox.showerror("ID invalid", message="Informe o código do produto a ser excluído!")
+        else:
+            query_sql = """ DELETE FROM estoque WHERE id=? """
+            dml_database(query_sql, self.código)
+            
+            self.clear_entries()
+            self.select_database()
