@@ -13,6 +13,7 @@ def dml_database(query, i):
             con = connection.cursor()
             con.execute(query, i)
     except Error as e:
+        print(e)
         messagebox.showerror(f"{e}", message="Não foi possível realizar o registro!")
     else:
         messagebox.showinfo("Successfully", message="Registro realizado com sucesso!")

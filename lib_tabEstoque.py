@@ -109,8 +109,27 @@ class Register(functions):
         if self.código == "" or not self.código.isdigit():
             messagebox.showerror("ID invalid", message="Informe o código do produto a ser excluído!")
         else:
-            query_sql = """ DELETE FROM estoque WHERE id=? """
-            dml_database(query_sql, self.código)
+            if messagebox.askyesno("Delete", message="Deseja excluir o registro?"):
+                query_sql = "DELETE FROM estoque WHERE id=?"
+                dml_database(query_sql, self.código)
+                
+                self.clear_entries()
+                self.select_database()
+    
+    def search_product(self):
+        self.lista_produtos.delete(*self.lista_produtos.get_children())
+        
+        self.produto_entry.insert(END, "%")
+        produto = self.produto_entry.get()
+        
+        query_sql = """
+            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
+            FROM estoque
+            WHERE produto LIKE '%s' ORDER BY produto ASC
+        """ % produto
+        return_dados = dql_database(query_sql)
+        
+        for dados in return_dados:
+            self.lista_produtos.insert("", END, values=dados)
             
-            self.clear_entries()
-            self.select_database()
+        self.clear_entries()

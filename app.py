@@ -57,7 +57,7 @@ class TabEstoque(Register):
             self.root, text="Salvar", command=self.register_product)
         btn_save.grid(column=0, row=0, padx=5)
 
-        btn_search = ctk.CTkButton(self.root, text="Buscar")
+        btn_search = ctk.CTkButton(self.root, text="Buscar", command=self.search_product)
         btn_search.grid(column=1, row=0, padx=5)
 
         btn_update = ctk.CTkButton(self.root, text="Atualizar", command=self.update_product)
