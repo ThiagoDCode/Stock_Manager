@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 import customtkinter as ctk
 
-from tab_estoque import Register
+from lib_tabEstoque import Register
 
 
 class Application:
@@ -60,7 +60,7 @@ class TabEstoque(Register):
         btn_search = ctk.CTkButton(self.root, text="Buscar")
         btn_search.grid(column=1, row=0, padx=5)
 
-        btn_update = ctk.CTkButton(self.root, text="Atualizar")
+        btn_update = ctk.CTkButton(self.root, text="Atualizar", command=self.update_product)
         btn_update.grid(column=2, row=0, padx=5)
 
         btn_delete = ctk.CTkButton(self.root, text="Excluir")
@@ -77,8 +77,10 @@ class TabEstoque(Register):
             self.frame_top, width=45, font=("Cascadia Code", 13))
         self.code_entry.place(x=5, y=30)
 
-        ctk.CTkLabel(self.frame_top, text="Produto*", font=(
+        ctk.CTkLabel(self.frame_top, text="Produto", font=(
             "Cascadia Code", 13)).place(x=55, y=5)
+        ctk.CTkLabel(self.frame_top, text="(obrigatório)", font=(
+            "Cascadia Code", 10, "italic")).place(x=115, y=5)
         self.produto_entry = ctk.CTkEntry(self.frame_top, width=350, font=(
             "Cascadia Code", 13), fg_color="transparent")
         self.produto_entry.place(x=55, y=30)
@@ -142,7 +144,11 @@ class TabEstoque(Register):
             self.root, width=990, height=286, border_width=1, border_color="#000")
         self.frame_bottom.place(y=240)
 
-        self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=('c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'))
+        # TREEVIEW ------------------------------------------------------------------------
+        self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
+            'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 
+            'c9', 'c10', 'c11',
+        ))
         self.lista_produtos.heading("#0", text="")
         self.lista_produtos.heading("#1", text="Código")
         self.lista_produtos.heading("#2", text="Produto")
@@ -151,23 +157,38 @@ class TabEstoque(Register):
         self.lista_produtos.heading("#5", text="Fornecedor")
         self.lista_produtos.heading("#6", text="Estoque")
         self.lista_produtos.heading("#7", text="Est.Mín.")
+        self.lista_produtos.heading("#8", text="NF")
+        
+        self.lista_produtos.heading("#9", text="Responsável")
+        self.lista_produtos.heading("#10", text="Fone_1")
+        self.lista_produtos.heading("#11", text="Fone_2")
 
         self.lista_produtos.column("#0", width=1)
-        self.lista_produtos.column("#1", width=30)
+        self.lista_produtos.column("#1", width=50)
         self.lista_produtos.column("#2", width=270)
-        self.lista_produtos.column("#3", width=70)
-        self.lista_produtos.column("#4", width=130)
+        self.lista_produtos.column("#3", width=85)
+        self.lista_produtos.column("#4", width=150)
         self.lista_produtos.column("#5", width=170)
-        self.lista_produtos.column("#6", width=60)
-        self.lista_produtos.column("#7", width=35)
+        self.lista_produtos.column("#6", width=75)
+        self.lista_produtos.column("#7", width=50)
+        self.lista_produtos.column("#8", width=95)
+        
+        self.lista_produtos.column("#9", width=50)
+        self.lista_produtos.column("#10", width=50)
+        self.lista_produtos.column("#11", width=50)
 
         self.lista_produtos.place(width=970, height=286)
-
+        # ----------------------------------------------------------------------------------
+        
+        # SCROLLBAR
         scroll_tree = Scrollbar(self.frame_bottom, orient="vertical")
         self.lista_produtos.configure(yscroll=scroll_tree.set)
         scroll_tree.place(x=970, y=0, width=20, height=286)
+        
+        # SELECIONA DADOS DA TABELA/TREEVIEW
+        self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
 
-        self.listar_dados()
+        self.select_database()
 
 
 if __name__ == "__main__":
