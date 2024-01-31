@@ -34,7 +34,10 @@ class functions:
     def select_database(self):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
 
-        query = "SELECT * FROM estoque"
+        query = """
+            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
+            FROM estoque
+        """
         data_return = self.dql_database(query)
 
         for dado in data_return:
@@ -115,17 +118,19 @@ class Register(functions, Database):
     def search_product(self):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
         
-        self.produto_entry.insert(END, "%")
-        produto = self.produto_entry.get()
-        
-        query_sql = """
-            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
-            FROM estoque
-            WHERE produto LIKE '%s' ORDER BY produto ASC
-        """ % produto
-        return_dados = self.dql_database(query_sql)
-        
-        for dados in return_dados:
-            self.lista_produtos.insert("", END, values=dados)
+        if self.produto_entry.get() == "":
+            self.select_database()
+        else:
+            self.produto_entry.insert(END, "%")
+            produto = self.produto_entry.get()
+            
+            data_query = """
+                        SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
+                        FROM estoque WHERE produto LIKE '%s' ORDER BY produto ASC
+                        """ % produto
+            data_return = self.dql_database(data_query)
+            
+            for dados in data_return:
+                self.lista_produtos.insert("", END, values=dados)
             
         self.clear_entries()

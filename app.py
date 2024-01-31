@@ -143,42 +143,41 @@ class TabEstoque(Register):
                      font=("Cascadia Code", 12, "bold")).place(x=10, y=175)
 
     def widgets_bottom(self):
-        self.frame_bottom = ctk.CTkFrame(
-            self.root, width=990, height=286, border_width=1, border_color="#000")
+        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=286, border_width=1, border_color="#000")
         self.frame_bottom.place(y=240)
 
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 
-            'c9', 'c10', 'c11',
+            'id', 'produto', 'medida', 'grupo', 'forne', 'estoque', 'mín', 'nf', 
+            'resp', 'fone1', 'fone2',
         ))
         self.lista_produtos.heading("#0", text="")
-        self.lista_produtos.heading("#1", text="Código")
-        self.lista_produtos.heading("#2", text="Produto")
-        self.lista_produtos.heading("#3", text="Medida")
-        self.lista_produtos.heading("#4", text="Grupo do Produto")
-        self.lista_produtos.heading("#5", text="Fornecedor")
-        self.lista_produtos.heading("#6", text="Estoque")
-        self.lista_produtos.heading("#7", text="Est.Mín.")
-        self.lista_produtos.heading("#8", text="NF")
+        self.lista_produtos.heading("id", text="Código")
+        self.lista_produtos.heading("produto", text="Produto")
+        self.lista_produtos.heading("medida", text="Medida")
+        self.lista_produtos.heading("grupo", text="Grupo do Produto")
+        self.lista_produtos.heading("forne", text="Fornecedor")
+        self.lista_produtos.heading("estoque", text="Estoque")
+        self.lista_produtos.heading("mín", text="Est.Mín.")
+        self.lista_produtos.heading("nf", text="NF")
         
-        self.lista_produtos.heading("#9", text="Responsável")
-        self.lista_produtos.heading("#10", text="Fone_1")
-        self.lista_produtos.heading("#11", text="Fone_2")
+        self.lista_produtos.heading("resp", text="Responsável")
+        self.lista_produtos.heading("fone1", text="Fone_1")
+        self.lista_produtos.heading("fone2", text="Fone_2")
 
         self.lista_produtos.column("#0", width=1)
-        self.lista_produtos.column("#1", width=50)
-        self.lista_produtos.column("#2", width=270)
-        self.lista_produtos.column("#3", width=85)
-        self.lista_produtos.column("#4", width=150)
-        self.lista_produtos.column("#5", width=170)
-        self.lista_produtos.column("#6", width=75)
-        self.lista_produtos.column("#7", width=50)
-        self.lista_produtos.column("#8", width=95)
+        self.lista_produtos.column("id", width=50)
+        self.lista_produtos.column("produto", width=270)
+        self.lista_produtos.column("medida", width=85)
+        self.lista_produtos.column("grupo", width=150)
+        self.lista_produtos.column("forne", width=170)
+        self.lista_produtos.column("estoque", width=75)
+        self.lista_produtos.column("mín", width=50)
+        self.lista_produtos.column("nf", width=95)
         
-        self.lista_produtos.column("#9", width=50)
-        self.lista_produtos.column("#10", width=50)
-        self.lista_produtos.column("#11", width=50)
+        self.lista_produtos.column("resp", width=50)
+        self.lista_produtos.column("fone1", width=50)
+        self.lista_produtos.column("fone2", width=50)
 
         self.lista_produtos.place(width=970, height=286)
         # ----------------------------------------------------------------------------------

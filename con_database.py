@@ -40,7 +40,7 @@ class Database:
         else:
             messagebox.showinfo("Successfully", message="Registro excluído com sucesso!")
         
-    def consult_db(self):
+    def all_select_db(self):
         pass
 
 
