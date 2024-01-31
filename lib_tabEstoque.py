@@ -7,7 +7,7 @@ from con_database import *
 
 
 class functions:
-    def variables(self):
+    def variables_entry(self):
         self.código = self.code_entry.get()
         self.produto = self.produto_entry.get()
         self.medida = self.medida_entry.get()
@@ -34,13 +34,10 @@ class functions:
     def select_database(self):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
 
-        query_sql = """
-            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
-            FROM estoque
-        """
-        return_dados = dql_database(query_sql)
+        query = "SELECT * FROM estoque"
+        data_return = self.dql_database(query)
 
-        for dado in return_dados:
+        for dado in data_return:
             self.lista_produtos.insert("", END, values=dado)
     
     def on_DoubleClick(self, event):
@@ -61,10 +58,10 @@ class functions:
             self.fone2_entry.insert(END, c11)
 
 
-class Register(functions):
+class Register(functions, Database):
 
     def register_product(self):
-        self.variables()
+        self.variables_entry()
 
         if self.produto_entry.get() == "":
             messagebox.showinfo("Aviso", message="Insira a descrição do produto!")
@@ -76,13 +73,13 @@ class Register(functions):
             lista_dados = [self.produto, self.medida, self.grupo, self.min,
                             self.fornecedor, self.resp, self.fone1, self.fone2, self.nf]
 
-            dml_database(query_sql, lista_dados)
+            self.dml_database(query_sql, lista_dados)
 
             self.clear_entries()
             self.select_database()
     
     def update_product(self):
-        self.variables()
+        self.variables_entry()
         
         if self.código == "" or not self.código.isdigit():
             messagebox.showerror("ID invalid", message="Informe o código do produto a ser atualizado!")
@@ -98,20 +95,19 @@ class Register(functions):
                 lista_dados = [self.produto, self.grupo, self.medida, self.min, self.fornecedor, 
                             self.resp, self.nf, self.fone1, self.fone2, self.código]
                 
-                dml_database(query_sql, lista_dados)
+                self.dml_database(query_sql, lista_dados)
             
                 self.clear_entries()
                 self.select_database()
     
     def delete_product(self):
-        self.variables()
+        self.variables_entry()
         
         if self.código == "" or not self.código.isdigit():
             messagebox.showerror("ID invalid", message="Informe o código do produto a ser excluído!")
         else:
             if messagebox.askyesno("Delete", message="Deseja excluir o registro?"):
-                query_sql = "DELETE FROM estoque WHERE id=?"
-                dml_database(query_sql, self.código)
+                self.dml_delete(self.código)
                 
                 self.clear_entries()
                 self.select_database()
@@ -127,7 +123,7 @@ class Register(functions):
             FROM estoque
             WHERE produto LIKE '%s' ORDER BY produto ASC
         """ % produto
-        return_dados = dql_database(query_sql)
+        return_dados = self.dql_database(query_sql)
         
         for dados in return_dados:
             self.lista_produtos.insert("", END, values=dados)

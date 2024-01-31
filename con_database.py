@@ -7,28 +7,41 @@ caminho = os.path.dirname(__file__)
 connection = sqlite3.connect(caminho + "/stockDatabase.db")
 
 
-def dml_database(query, i):
-    try:
-        with connection:
-            con = connection.cursor()
-            con.execute(query, i)
-    except Error as e:
-        print(e)
-        messagebox.showerror(f"{e}", message="Não foi possível realizar o registro!")
-    else:
-        messagebox.showinfo("Successfully", message="Registro realizado com sucesso!")
-
-
-def dql_database(query):
-    try:
-        with connection:
-            con = connection.cursor()
-            con.execute(query)
-            response = con.fetchall()
-    except Error as e:
-        messagebox.showerror(f"{e}", message="Não foi possível encontrar o registro!")
-    else:
-        return response
+class Database:
+    
+    def dml_database(self, query_sql, dados):
+        try:
+            with connection:
+                con = connection.cursor()
+                con.execute(query_sql, dados)
+        except Error as e:
+            messagebox.showerror(f"{e}", message="Não foi possível realizar o registro!")
+        else:
+            messagebox.showinfo("Successfully", message="Registro realizado com sucesso!")
+    
+    def dql_database(self, query_sql):
+        try:
+            with connection:
+                con = connection.cursor()
+                con.execute(query_sql)
+                response = con.fetchall()
+        except Error as e:
+            messagebox.showerror(f"{e}", message="Não foi possível encontrar o registro!")
+        else:
+            return response
+    
+    def dml_delete(self, dados):
+        try:
+            with connection:
+                con = connection.cursor()
+                con.execute(f"DELETE FROM estoque WHERE id='{dados}'")
+        except Error as e:
+            messagebox.showerror(f"{e}", message="Não foi possível realizar o registro!")
+        else:
+            messagebox.showinfo("Successfully", message="Registro excluído com sucesso!")
+        
+    def consult_db(self):
+        pass
 
 
 def create_table():
@@ -47,7 +60,7 @@ def create_table():
             fone_2 TEXT(14)
         );
     """
-    
+
     try:
         with connection:
             con = connection.cursor()
