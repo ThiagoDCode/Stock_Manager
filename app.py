@@ -5,8 +5,9 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 from tkcalendar import DateEntry
 
-from lib_tabEstoque import Register
-from lib_functions import Functions
+from functions_estoque import Register
+from functions_entrada import FunctionsEntrada
+from functions_base import Functions
 
 
 class Application:
@@ -151,7 +152,7 @@ class TabEstoque(Register, Functions):
         self.lista_produtos.heading("fone1", text="Fone_1")
         self.lista_produtos.heading("fone2", text="Fone_2")
 
-        self.lista_produtos.column("#0", width=1)
+        self.lista_produtos.column("#0", width=0, stretch=False)
         self.lista_produtos.column("id", width=50)
         self.lista_produtos.column("produto", width=270)
         self.lista_produtos.column("medida", width=85)
@@ -161,29 +162,25 @@ class TabEstoque(Register, Functions):
         self.lista_produtos.column("mín", width=50)
         self.lista_produtos.column("nf", width=95)
 
-        self.lista_produtos.column("resp", width=50)
-        self.lista_produtos.column("fone1", width=50)
-        self.lista_produtos.column("fone2", width=50)
+        self.lista_produtos.column("resp", width=0, stretch=False)
+        self.lista_produtos.column("fone1", width=0, stretch=False)
+        self.lista_produtos.column("fone2", width=0, stretch=False)
 
         self.lista_produtos.place(width=970, height=286)
         # ----------------------------------------------------------------------------------
 
         # SCROLLBAR
-        scroll_tree = Scrollbar(self.frame_bottom, orient="vertical")
-        self.lista_produtos.configure(yscroll=scroll_tree.set)
-        scroll_tree.place(x=970, y=0, width=20, height=278)
+        scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_produtos.yview)
+        self.lista_produtos.configure(yscrollcommand=scrollbar_y.set)
+        scrollbar_y.place(x=970, y=0, width=20, height=278)
 
         # SELECIONA DADOS DA TABELA/TREEVIEW
         self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
         
-        query_select = """
-            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
-            FROM estoque
-        """
-        self.select_database2(query_select)
+        self.select_database()
 
 
-class TabEntrada(Functions):
+class TabEntrada(FunctionsEntrada, Functions):
     def __init__(self, root):
         self.root = root
         
@@ -316,12 +313,8 @@ class TabEntrada(Functions):
         self.lista_produtos.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
         scrollbar_y.place(x=970, y=88, width=20, height=245)
         scrollbar_x.place(x=0, y=315, width=970, height=20)
-        
-        query_select = """
-            SELECT id, produto, medida, estoque, fornecedor, nf
-            FROM estoque
-        """
-        self.select_database2(query_select)
+
+        self.select_database()
 
 
 if __name__ == "__main__":

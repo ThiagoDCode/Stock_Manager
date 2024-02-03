@@ -1,7 +1,5 @@
 from tkinter import *
-import customtkinter as ctk
 from tkinter import messagebox
-from sqlite3 import Error
 
 from con_database import *
 
@@ -30,6 +28,19 @@ class FunctionsEstoque:
         self.fone1_entry.delete(0, END)
         self.fone2_entry.delete(0, END)
         self.nf_entry.delete(0, END)
+    
+    def select_database(self):
+        self.lista_produtos.delete(*self.lista_produtos.get_children())
+        
+        query_select = """
+            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
+            FROM estoque
+        """
+
+        data_return = Database().dql_database(query_select)
+
+        for dado in data_return:
+            self.lista_produtos.insert("", "end", values=dado)
     
     def on_DoubleClick(self, event):
         self.clear_entries()
