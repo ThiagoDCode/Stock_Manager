@@ -6,7 +6,7 @@ from sqlite3 import Error
 from con_database import *
 
 
-class functions:
+class FunctionsEstoque:
     def variables_entry(self):
         self.código = self.code_entry.get()
         self.produto = self.produto_entry.get()
@@ -61,7 +61,7 @@ class functions:
             self.fone2_entry.insert(END, c11)
 
 
-class Register(functions, Database):
+class Register(FunctionsEstoque, Database):
 
     def register_product(self):
         self.variables_entry()

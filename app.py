@@ -1,8 +1,10 @@
 from tkinter import *
 from tkinter import ttk
 import customtkinter as ctk
+from PIL import Image, ImageTk
 
 from lib_tabEstoque import Register
+from lib_functions import Functions
 
 
 class Application:
@@ -44,7 +46,7 @@ class Application:
         self.tabs_view.set("Produtos e Estoque")
 
 
-class TabEstoque(Register):
+class TabEstoque(Register, Functions):
     def __init__(self, root):
         self.root = root
 
@@ -53,23 +55,26 @@ class TabEstoque(Register):
         self.widgets_bottom()
 
     def buttons_header(self):
-        btn_save = ctk.CTkButton(
-            self.root, text="Salvar", command=self.register_product)
-        btn_save.grid(column=0, row=0, padx=5)
+        btn_add = ctk.CTkButton(self.root, image=self.image_button("add.png", (34, 34)), text="", width=30, 
+                                compound=LEFT, anchor=NW, fg_color="transparent", hover_color="#363636", command=self.register_product)
+        btn_add.grid(column=0, row=0, padx=1)
 
-        btn_search = ctk.CTkButton(self.root, text="Buscar", command=self.search_product)
-        btn_search.grid(column=1, row=0, padx=5)
+        btn_search = ctk.CTkButton(self.root, image=self.image_button("search.png", (34, 34)), text="", width=30, 
+                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color="#363636", command=self.search_product)
+        btn_search.grid(column=1, row=0, padx=1)
 
-        btn_update = ctk.CTkButton(self.root, text="Atualizar", command=self.update_product)
-        btn_update.grid(column=2, row=0, padx=5)
+        btn_update = ctk.CTkButton(self.root, image=self.image_button("update.png", (32, 32)), text="", width=30, 
+                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color="#363636", command=self.update_product)
+        btn_update.grid(column=2, row=0, padx=1)
 
-        btn_delete = ctk.CTkButton(self.root, text="Excluir", command=self.delete_product)
+        btn_delete = ctk.CTkButton(self.root, image=self.image_button("delete.png", (28, 28)), text="", width=30, 
+                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color="#363636", command=self.delete_product)
         btn_delete.grid(column=3, row=0)
 
     def widgets_top(self):
         self.frame_top = ctk.CTkFrame(
-            self.root, width=990, height=200, border_width=1, border_color="#000")
-        self.frame_top.place(y=35)
+            self.root, width=990, height=200)
+        self.frame_top.place(y=40)
 
         ctk.CTkLabel(self.frame_top, text="Código", font=(
             "Cascadia Code", 12.5)).place(x=5, y=5)
@@ -140,11 +145,11 @@ class TabEstoque(Register):
                      height=190, bg_color="#808080").place(x=765, y=5)
         
         ctk.CTkLabel(self.frame_top, text="Dobro click para selecionar um produto!", 
-                     font=("Cascadia Code", 12, "bold")).place(x=10, y=175)
+                     font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
 
     def widgets_bottom(self):
         self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=286, border_width=1, border_color="#000")
-        self.frame_bottom.place(y=240)
+        self.frame_bottom.place(y=245)
 
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
@@ -185,7 +190,7 @@ class TabEstoque(Register):
         # SCROLLBAR
         scroll_tree = Scrollbar(self.frame_bottom, orient="vertical")
         self.lista_produtos.configure(yscroll=scroll_tree.set)
-        scroll_tree.place(x=970, y=0, width=20, height=286)
+        scroll_tree.place(x=970, y=0, width=20, height=278)
         
         # SELECIONA DADOS DA TABELA/TREEVIEW
         self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
