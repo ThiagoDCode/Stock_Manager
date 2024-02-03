@@ -1,11 +1,14 @@
+import customtkinter as ctk
 from PIL import Image, ImageTk
+import os
 
 
 class Functions:
-    
+
     def image_button(self, nameImage, scale=tuple):
-        img = Image.open("./Stock_Manager/image/" + nameImage)
-        img = img.resize(scale)
-        img = ImageTk.PhotoImage(img)
-        
+        img = ctk.CTkImage(light_image=Image.open("./Stock_Manager/image/" + nameImage),
+                           dark_image=Image.open(
+                               "./Stock_Manager/image/" + nameImage),
+                           size=(scale))
+
         return img

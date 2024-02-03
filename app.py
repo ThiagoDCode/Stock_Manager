@@ -55,20 +55,20 @@ class TabEstoque(Register, Functions):
         self.widgets_bottom()
 
     def buttons_header(self):
-        btn_add = ctk.CTkButton(self.root, image=self.image_button("add.png", (34, 34)), text="", width=30, 
-                                compound=LEFT, anchor=NW, fg_color="transparent", hover_color="#363636", command=self.register_product)
+        btn_add = ctk.CTkButton(self.root, image=self.image_button("add.png", (34, 34)), text="", width=30,
+                                compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), command=self.register_product)
         btn_add.grid(column=0, row=0, padx=1)
 
-        btn_search = ctk.CTkButton(self.root, image=self.image_button("search.png", (34, 34)), text="", width=30, 
-                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color="#363636", command=self.search_product)
+        btn_search = ctk.CTkButton(self.root, image=self.image_button("search.png", (34, 34)), text="", width=30,
+                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), command=self.search_product)
         btn_search.grid(column=1, row=0, padx=1)
 
-        btn_update = ctk.CTkButton(self.root, image=self.image_button("update.png", (32, 32)), text="", width=30, 
-                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color="#363636", command=self.update_product)
+        btn_update = ctk.CTkButton(self.root, image=self.image_button("update.png", (32, 32)), text="", width=30,
+                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), command=self.update_product)
         btn_update.grid(column=2, row=0, padx=1)
 
-        btn_delete = ctk.CTkButton(self.root, image=self.image_button("delete.png", (28, 28)), text="", width=30, 
-                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color="#363636", command=self.delete_product)
+        btn_delete = ctk.CTkButton(self.root, image=self.image_button("delete.png", (28, 28)), text="", width=30,
+                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), command=self.delete_product)
         btn_delete.grid(column=3, row=0)
 
     def widgets_top(self):
@@ -143,17 +143,18 @@ class TabEstoque(Register, Functions):
 
         ctk.CTkLabel(self.frame_top, text="IMAGEM", width=220,
                      height=190, bg_color="#808080").place(x=765, y=5)
-        
-        ctk.CTkLabel(self.frame_top, text="Dobro click para selecionar um produto!", 
+
+        ctk.CTkLabel(self.frame_top, text="Dobro click para selecionar um produto!",
                      font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
 
     def widgets_bottom(self):
-        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=286, border_width=1, border_color="#000")
+        self.frame_bottom = ctk.CTkFrame(
+            self.root, width=990, height=286, border_width=1, border_color="#000")
         self.frame_bottom.place(y=245)
 
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'produto', 'medida', 'grupo', 'forne', 'estoque', 'mín', 'nf', 
+            'id', 'produto', 'medida', 'grupo', 'forne', 'estoque', 'mín', 'nf',
             'resp', 'fone1', 'fone2',
         ))
         self.lista_produtos.heading("#0", text="")
@@ -165,7 +166,7 @@ class TabEstoque(Register, Functions):
         self.lista_produtos.heading("estoque", text="Estoque")
         self.lista_produtos.heading("mín", text="Est.Mín.")
         self.lista_produtos.heading("nf", text="NF")
-        
+
         self.lista_produtos.heading("resp", text="Responsável")
         self.lista_produtos.heading("fone1", text="Fone_1")
         self.lista_produtos.heading("fone2", text="Fone_2")
@@ -179,19 +180,19 @@ class TabEstoque(Register, Functions):
         self.lista_produtos.column("estoque", width=75)
         self.lista_produtos.column("mín", width=50)
         self.lista_produtos.column("nf", width=95)
-        
+
         self.lista_produtos.column("resp", width=50)
         self.lista_produtos.column("fone1", width=50)
         self.lista_produtos.column("fone2", width=50)
 
         self.lista_produtos.place(width=970, height=286)
         # ----------------------------------------------------------------------------------
-        
+
         # SCROLLBAR
         scroll_tree = Scrollbar(self.frame_bottom, orient="vertical")
         self.lista_produtos.configure(yscroll=scroll_tree.set)
         scroll_tree.place(x=970, y=0, width=20, height=278)
-        
+
         # SELECIONA DADOS DA TABELA/TREEVIEW
         self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
 
