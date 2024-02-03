@@ -185,6 +185,7 @@ class TabEntrada(Functions):
         
         self.buttons_header()
         self.widgets_top()
+        self.widgets_bottom()
         
     def buttons_header(self):
         btn_save = ctk.CTkButton(self.root, image=self.image_button("save.png", (40, 40)), text="", width=30,
@@ -252,6 +253,27 @@ class TabEntrada(Functions):
         self.estoque_entry = ctk.CTkEntry(self.sub_frame_top, width=75, justify=CENTER, 
                                        font=("Cascadia Code", 13), fg_color="transparent")
         self.estoque_entry.place(x=42, y=96)
+
+    def widgets_bottom(self):
+        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=335, border_width=1, border_color="#000")
+        self.frame_bottom.place(y=190)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Rastreamento de Lotes - (duplo CLICK para selecionar um produto)", 
+                     font=("Cascadia Code", 12, "bold")).place(x=10, y=1)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Mês", font=("Cascadia Code", 13)).place(x=5, y=30)
+        self.filter_mes = ctk.CTkEntry(self.frame_bottom, width=50, justify=CENTER, 
+                                       font=("Cascadia Code", 13), fg_color="transparent")
+        self.filter_mes.place(x=5, y=55)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Ano", font=("Cascadia Code", 13)).place(x=65, y=30)
+        self.filter_ano = ctk.CTkEntry(self.frame_bottom, width=50, justify=CENTER, 
+                                       font=("Cascadia Code", 13), fg_color="transparent")
+        self.filter_ano.place(x=65, y=55)
+        
+        ctk.CTkButton(self.frame_bottom, image=self.image_button("clear-filters.png", (20, 20)), compound=RIGHT,
+                      width=30, text="LIMPAR", font=("Cascadia Code", 13, "bold"), text_color=("#FFF", "#000"),
+                      fg_color=("#363636", "#D3D3D3"), command=None).place(x=125, y=55)
 
 
 if __name__ == "__main__":
