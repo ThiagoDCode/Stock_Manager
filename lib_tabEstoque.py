@@ -31,18 +31,6 @@ class FunctionsEstoque:
         self.fone2_entry.delete(0, END)
         self.nf_entry.delete(0, END)
     
-    def select_database(self):
-        self.lista_produtos.delete(*self.lista_produtos.get_children())
-
-        query = """
-            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
-            FROM estoque
-        """
-        data_return = self.dql_database(query)
-
-        for dado in data_return:
-            self.lista_produtos.insert("", END, values=dado)
-    
     def on_DoubleClick(self, event):
         self.clear_entries()
         self.lista_produtos.selection()

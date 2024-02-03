@@ -175,8 +175,12 @@ class TabEstoque(Register, Functions):
 
         # SELECIONA DADOS DA TABELA/TREEVIEW
         self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
-
-        self.select_database()
+        
+        query_select = """
+            SELECT id, produto, medida, grupo, fornecedor, estoque, est_mín, NF, responsável, fone_1, fone_2
+            FROM estoque
+        """
+        self.select_database2(query_select)
 
 
 class TabEntrada(Functions):
@@ -186,6 +190,7 @@ class TabEntrada(Functions):
         self.buttons_header()
         self.widgets_top()
         self.widgets_bottom()
+        self.view_bottom()
         
     def buttons_header(self):
         btn_save = ctk.CTkButton(self.root, image=self.image_button("save.png", (40, 40)), text="", width=30,
@@ -274,6 +279,49 @@ class TabEntrada(Functions):
         ctk.CTkButton(self.frame_bottom, image=self.image_button("clear-filters.png", (20, 20)), compound=RIGHT,
                       width=30, text="LIMPAR", font=("Cascadia Code", 13, "bold"), text_color=("#FFF", "#000"),
                       fg_color=("#363636", "#D3D3D3"), command=None).place(x=125, y=55)
+        
+    def view_bottom(self):
+        # TREEVIEW ------------------------------------------------------------------------
+        self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
+            'id', 'data', 'produto', 'medida', 'lote', 'estoque', 'fornecedor', 'nf', 'status'
+        ))
+        self.lista_produtos.heading("#0", text="")
+        self.lista_produtos.heading("id", text="Registro")
+        self.lista_produtos.heading("data", text="Data")
+        self.lista_produtos.heading("produto", text="Produto")
+        self.lista_produtos.heading("medida", text="Medida")
+        self.lista_produtos.heading("lote", text="Lote")
+        self.lista_produtos.heading("estoque", text="Qtd")
+        self.lista_produtos.heading("fornecedor", text="Fornecedor")
+        self.lista_produtos.heading("nf", text="NF")
+        self.lista_produtos.heading("status", text="Status")
+
+        self.lista_produtos.column("#0", width=0, stretch=False)
+        self.lista_produtos.column("id", width=50)
+        self.lista_produtos.column("data", width=100)
+        self.lista_produtos.column("produto", width=270)
+        self.lista_produtos.column("medida", width=85)
+        self.lista_produtos.column("lote", width=85)
+        self.lista_produtos.column("estoque", width=75)
+        self.lista_produtos.column("fornecedor", width=270)
+        self.lista_produtos.column("nf", width=95)
+        self.lista_produtos.column("status", width=150)
+
+        self.lista_produtos.place(y=88, width=970, height=330)
+        # ----------------------------------------------------------------------------------
+        
+        # SCROLLBAR
+        scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_produtos.yview)
+        scrollbar_x = ttk.Scrollbar(self.frame_bottom, orient="horizontal", command=self.lista_produtos.xview)
+        self.lista_produtos.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+        scrollbar_y.place(x=970, y=88, width=20, height=245)
+        scrollbar_x.place(x=0, y=315, width=970, height=20)
+        
+        query_select = """
+            SELECT id, produto, medida, estoque, fornecedor, nf
+            FROM estoque
+        """
+        self.select_database2(query_select)
 
 
 if __name__ == "__main__":
