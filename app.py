@@ -1,9 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from typing import Any
 import customtkinter as ctk
-from PIL import Image, ImageTk
-from tkcalendar import DateEntry
 
 from functions_estoque import FunctionsEstoque
 from functions_entrada import FunctionsEntrada
@@ -15,7 +12,7 @@ class Application:
         self.root = ctk.CTk()
 
         self.layout_config()
-        self.appearance_theme()
+        self.menu_bar()
         self.tabs_application()
 
         self.root.mainloop()
@@ -25,18 +22,16 @@ class Application:
         self.root.geometry("1000x600")
         self.root.resizable(False, False)
 
-    def appearance_theme(self):
-        ctk.set_default_color_theme("dark-blue")
-        ctk.set_appearance_mode("system")
-
-        ctk.CTkLabel(self.root, text="Tema", font=(
-            "Cascadia Code", 15)).place(x=860, y=571)
-        ctk.CTkOptionMenu(self.root, width=90, height=20, values=['System', 'Light', 'Dark'], font=("Cascadia Code", 15),
-                          command=ctk.set_appearance_mode).place(x=900, y=575)
-
+    def menu_bar(self):  
+        menu_bar = Menu(self.root)
+        self.root.configure(menu=menu_bar)
+        edite = Menu(menu_bar)
+        
+        menu_bar.add_cascade(label="Edite", menu=edite)
+        edite.add_command(label="Configurações", command=WindowConfig)
+    
     def tabs_application(self):
-        self.tabs_view = ctk.CTkTabview(
-            self.root, width=1000, height=570, anchor="w", text_color=('#000', '#FFF'))
+        self.tabs_view = ctk.CTkTabview(self.root, width=1000, height=570, anchor="w", text_color=('#000', '#FFF'))
         self.tabs_view.pack()
 
         self.tabs_view.add("Resumos")
@@ -50,6 +45,26 @@ class Application:
         self.tabs_view.set("Entrada de Produtos")
 
 
+class WindowConfig(ctk.CTkToplevel):
+    def __init__(self):
+        super().__init__()
+        self.geometry("300x400")
+        self.minsize(300, 400)
+        self.maxsize(300, 400)
+        self.focus()
+        self.grab_set()
+        
+        self.appearance_theme()
+    
+    def appearance_theme(self):
+        ctk.set_default_color_theme("dark-blue")
+        ctk.set_appearance_mode("system")
+
+        ctk.CTkLabel(self, text="Tema", font=("Cascadia Code", 15, "bold")).place(x=50, y=50)
+        ctk.CTkOptionMenu(self, width=90, height=20, values=['System', 'Light', 'Dark'], font=("Cascadia Code", 15), 
+                          command=ctk.set_appearance_mode).place(x=50, y=100)
+
+
 class TabEstoque(FunctionsEstoque, Functions):
     def __init__(self, root):
         self.root = root
@@ -57,7 +72,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.buttons_header()
         self.widgets_top()
         self.widgets_bottom()
-
+    
     def buttons_header(self):
         btn_add = ctk.CTkButton(self.root, image=self.image_button("add.png", (34, 34)), text="", width=30,
                                 compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), command=self.register_product)
@@ -129,8 +144,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         ctk.CTkLabel(self.frame_top, text="Duplo CLICK para selecionar um produto!", font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
 
     def widgets_bottom(self):
-        self.frame_bottom = ctk.CTkFrame(
-            self.root, width=990, height=286, border_width=1, border_color="#000")
+        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=286, border_width=1, border_color="#000")
         self.frame_bottom.place(y=245)
 
         # TREEVIEW ------------------------------------------------------------------------
