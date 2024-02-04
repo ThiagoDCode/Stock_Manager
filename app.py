@@ -3,6 +3,8 @@ from tkinter import ttk
 import customtkinter as ctk
 from tkcalendar import DateEntry
 
+from TAB_resumos import *
+
 from functions_estoque import FunctionsEstoque
 from functions_entrada import FunctionsEntrada
 from functions_base import Functions
@@ -36,6 +38,7 @@ class Application:
         self.tabs_view.pack()
 
         self.tabs_view.add("Resumos")
+        TabResumos(self.tabs_view.tab("Resumos"))
 
         self.tabs_view.add("Produtos e Estoque")
         TabEstoque(self.tabs_view.tab("Produtos e Estoque"))
@@ -43,7 +46,7 @@ class Application:
         self.tabs_view.add("Entrada de Produtos")
         TabEntrada(self.tabs_view.tab("Entrada de Produtos"))
 
-        self.tabs_view.set("Entrada de Produtos")
+        self.tabs_view.set("Resumos")
 
 
 class WindowConfig(ctk.CTkToplevel):
