@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 
 from con_database import *
+from functions_base import *
 
 
 class Register(Database):
@@ -10,34 +11,14 @@ class Register(Database):
         self.variables_entry()
 
         if self.produto_entry.get() == "":
-            messagebox.showinfo(
-                "Aviso", message="Insira a descrição do produto!")
+            messagebox.showinfo("Aviso", message="Insira a descrição do produto!")
 
         else:
             query_sql = """
-                INSERT INTO estoque (produto, medida, grupo, est_mín, fornecedor, responsável, fone_1, fone_2, NF)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) """
-            lista_dados = [self.produto, self.medida, self.grupo, self.min,
-                           self.fornecedor, self.resp, self.fone1, self.fone2, self.nf]
-
-            self.dml_database(query_sql, lista_dados)
-
-            self.clear_entries()
-            self.select_database()
-    
-    def register_product2(self):
-        self.variables_entry()
-
-        if self.produto_entry.get() == "":
-            messagebox.showinfo(
-                "Aviso", message="Insira a descrição do produto!")
-
-        else:
-            query_sql = """
-                INSERT INTO estoque (produto, medida, grupo, est_mín, fornecedor, responsável, fone_1, fone_2, NF, data)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
-            lista_dados = [self.produto, self.medida, self.grupo, self.min,
-                           self.fornecedor, self.resp, self.fone1, self.fone2, self.nf, self.data]
+                INSERT INTO estoque (produto, medida, grupo, est_mín, fornecedor, responsável, fone_1, fone_2, NF, data, gestor)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
+            lista_dados = [self.produto, self.medida, self.grupo, self.min, self.fornecedor, 
+                           self.resp, self.fone1, self.fone2, self.nf, self.data, self.gestor]
 
             self.dml_database(query_sql, lista_dados)
 
@@ -102,7 +83,7 @@ class Register(Database):
         self.clear_entries()
 
 
-class FunctionsEstoque(Register):
+class FunctionsEstoque(Register, Functions):
     
     def variables_entry(self):
         self.código = self.code_entry.get()
@@ -116,8 +97,8 @@ class FunctionsEstoque(Register):
         self.fone2 = self.fone2_entry.get()
         self.nf = self.nf_entry.get()
         
-        #self.gestor = self.gestor_entry.get()
-        #self.data = self.data_register.get()
+        self.gestor = self.gestor_entry.get()
+        self.data = self.data_register.get()
 
     def clear_entries(self):
         self.code_entry.delete(0, END)

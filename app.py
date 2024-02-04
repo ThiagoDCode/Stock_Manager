@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 import customtkinter as ctk
+from tkcalendar import DateEntry
 
 from functions_estoque import FunctionsEstoque
 from functions_entrada import FunctionsEntrada
@@ -31,7 +32,7 @@ class Application:
         edite.add_command(label="Configurações", command=WindowConfig)
     
     def tabs_application(self):
-        self.tabs_view = ctk.CTkTabview(self.root, width=1000, height=570, anchor="w", text_color=('#000', '#FFF'))
+        self.tabs_view = ctk.CTkTabview(self.root, width=1000, height=600, anchor="w", text_color=('#000', '#FFF'))
         self.tabs_view.pack()
 
         self.tabs_view.add("Resumos")
@@ -154,8 +155,16 @@ class TabEstoque(FunctionsEstoque, Functions):
         ctk.CTkLabel(self.frame_top, text="Duplo CLICK para selecionar um produto!", font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
 
     def widgets_bottom(self):
-        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=286, border_width=1, border_color="#000")
+        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=308, border_width=1, border_color="#000")
         self.frame_bottom.place(y=245)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Gestor", font=("Cascadia Code", 15, "bold")).place(x=10, y=279)
+        self.gestor_entry = ctk.CTkEntry(self.frame_bottom, width=225, font=("Cascadia Code", 15))
+        self.gestor_entry.place(x=70, y=279)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Data", font=("Cascadia Code", 15, "bold")).place(x=305, y=279)
+        self.data_register = DateEntry(self.frame_bottom)
+        self.data_register.place(x=350, y=285)
 
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
@@ -190,13 +199,13 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.column("fone1", width=0, stretch=False)
         self.lista_produtos.column("fone2", width=0, stretch=False)
 
-        self.lista_produtos.place(width=970, height=286)
+        self.lista_produtos.place(width=970, height=275)
         # ----------------------------------------------------------------------------------
 
         # SCROLLBAR
         scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_produtos.yview)
         self.lista_produtos.configure(yscrollcommand=scrollbar_y.set)
-        scrollbar_y.place(x=970, y=0, width=20, height=278)
+        scrollbar_y.place(x=970, y=0, width=20, height=275)
 
         # SELECIONA DADOS DA TABELA/TREEVIEW
         self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
@@ -282,7 +291,7 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.estoque_entry.place(x=42, y=96)
 
     def widgets_bottom(self):
-        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=335, border_width=1, border_color="#000")
+        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=365, border_width=1, border_color="#000")
         self.frame_bottom.place(y=190)
         
         ctk.CTkLabel(self.frame_bottom, text="Rastreamento de Lotes - (duplo CLICK para selecionar um produto)", 
@@ -301,6 +310,14 @@ class TabEntrada(FunctionsEntrada, Functions):
         ctk.CTkButton(self.frame_bottom, image=self.image_button("clear-filters.png", (20, 20)), compound=RIGHT,
                       width=30, text="LIMPAR", font=("Cascadia Code", 13, "bold"), text_color=("#FFF", "#000"),
                       fg_color=("#363636", "#D3D3D3"), command=None).place(x=125, y=55)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Gestor", font=("Cascadia Code", 15, "bold")).place(x=10, y=334)
+        self.gestor_entry = ctk.CTkEntry(self.frame_bottom, width=225, font=("Cascadia Code", 15))
+        self.gestor_entry.place(x=70, y=334)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Data", font=("Cascadia Code", 15, "bold")).place(x=305, y=334)
+        self.data_register = DateEntry(self.frame_bottom)
+        self.data_register.place(x=350, y=339)
         
     def view_bottom(self):
         # TREEVIEW ------------------------------------------------------------------------
@@ -332,15 +349,15 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.lista_produtos.column("status", width=125)
         self.lista_produtos.column("grupo", width=150)
 
-        self.lista_produtos.place(y=88, width=970, height=330)
+        self.lista_produtos.place(y=88, width=970, height=230)
         # ----------------------------------------------------------------------------------
         
         # SCROLLBAR
         scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_produtos.yview)
         scrollbar_x = ttk.Scrollbar(self.frame_bottom, orient="horizontal", command=self.lista_produtos.xview)
         self.lista_produtos.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
-        scrollbar_y.place(x=970, y=88, width=20, height=245)
-        scrollbar_x.place(x=0, y=315, width=970, height=20)
+        scrollbar_y.place(x=970, y=88, width=20, height=242)
+        scrollbar_x.place(x=0, y=310, width=970, height=20)
         
         # SELECIONA DADOS DA TABELA/TREEVIEW
         self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
