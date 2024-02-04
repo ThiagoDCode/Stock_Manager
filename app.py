@@ -48,13 +48,17 @@ class Application:
 class WindowConfig(ctk.CTkToplevel):
     def __init__(self):
         super().__init__()
+        
+        self.layout_config()
+        self.appearance_theme()
+        self.confirm_config()
+    
+    def layout_config(self):
         self.geometry("300x400")
         self.minsize(300, 400)
         self.maxsize(300, 400)
         self.focus()
         self.grab_set()
-        
-        self.appearance_theme()
     
     def appearance_theme(self):
         ctk.set_default_color_theme("dark-blue")
@@ -63,6 +67,12 @@ class WindowConfig(ctk.CTkToplevel):
         ctk.CTkLabel(self, text="Tema", font=("Cascadia Code", 15, "bold")).place(x=50, y=50)
         ctk.CTkOptionMenu(self, width=90, height=20, values=['System', 'Light', 'Dark'], font=("Cascadia Code", 15), 
                           command=ctk.set_appearance_mode).place(x=50, y=100)
+    
+    def confirm_config(self):
+        ctk.CTkButton(self, width=75, text="APLICAR", font=("Cascadia Code", 15, "bold"),
+                      command=None).place(x=100, y=360)
+        ctk.CTkButton(self, width=75, text="CANCELAR", font=("Cascadia Code", 15, "bold"),
+                      command=self.destroy).place(x=185, y=360)
 
 
 class TabEstoque(FunctionsEstoque, Functions):
