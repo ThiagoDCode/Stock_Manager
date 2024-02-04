@@ -17,14 +17,14 @@ class Register(Database):
         else:
             query_update = """
                 UPDATE estoque SET
-                    medida=?, lote=?, estoque=? 
+                    medida=?, lote=?, estoque=?, data=?, gestor=? 
                 WHERE id=?
             """
             try:
                 sum_estoque = int(self.qtd_entrada) + int(self.estoque)
             except:
                 sum_estoque = self.qtd_entrada
-            lista_dados = [self.medida, self.lote, sum_estoque, self.código]
+            lista_dados = [self.medida, self.lote, sum_estoque, self.data, self.gestor, self.código]
             
             self.dml_database(query_update, lista_dados)
             
@@ -35,7 +35,7 @@ class FunctionsEntrada(Register):
     
     def variables_entries(self):
         self.código = self.reg_entry.get()
-        self.data = self.data_register.get()
+        self.data_reg = self.data_register.get()
         self.produto = self.produto_entry.get()
         self.medida = self.medida_entry.get()
         self.grupo = self.grupo_entry.get()
@@ -44,6 +44,9 @@ class FunctionsEntrada(Register):
         self.lote = self.lote_entry.get()
         self.status = self.status_entry.get()
         self.estoque = self.estoque_entry.get()
+        
+        self.gestor = self.gestor_entry.get()
+        self.data = self.data_entry.get()
         
         self.qtd_entrada = self.quantidade_entry.get()
     
@@ -65,7 +68,7 @@ class FunctionsEntrada(Register):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
 
         query_select = """
-            SELECT id, data, produto, medida, lote, estoque, fornecedor, nf, status, grupo
+            SELECT id, data, produto, medida, lote, estoque, fornecedor, nf, grupo, status
             FROM estoque
         """
 
@@ -88,5 +91,5 @@ class FunctionsEntrada(Register):
             self.estoque_entry.insert(END, c6)
             self.fornecedor_entry.insert(END, c7)
             self.nf_entry.insert(END, c8)
-            self.status_entry.insert(END, c9)
-            self.grupo_entry.insert(END, c10)
+            self.grupo_entry.insert(END, c9)
+            self.status_entry.insert(END, c10)

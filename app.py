@@ -316,14 +316,13 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.gestor_entry.place(x=70, y=334)
         
         ctk.CTkLabel(self.frame_bottom, text="Data", font=("Cascadia Code", 15, "bold")).place(x=305, y=334)
-        self.data_register = DateEntry(self.frame_bottom)
-        self.data_register.place(x=350, y=339)
+        self.data_entry = DateEntry(self.frame_bottom)
+        self.data_entry.place(x=350, y=339)
         
     def view_bottom(self):
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'data', 'produto', 'medida', 'lote', 'estoque', 'fornecedor', 'nf', 'status',
-            'grupo', 
+            'id', 'data', 'produto', 'medida', 'lote', 'estoque', 'fornecedor', 'nf', 'grupo', 'status',
         ))
         self.lista_produtos.heading("#0", text="")
         self.lista_produtos.heading("id", text="Registro")
@@ -334,8 +333,8 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.lista_produtos.heading("estoque", text="Qtd")
         self.lista_produtos.heading("fornecedor", text="Fornecedor")
         self.lista_produtos.heading("nf", text="NF")
-        self.lista_produtos.heading("status", text="Status")
         self.lista_produtos.heading("grupo", text="Grupo do Produto")
+        self.lista_produtos.heading("status", text="Status")
 
         self.lista_produtos.column("#0", width=0, stretch=False)
         self.lista_produtos.column("id", width=50)
@@ -346,8 +345,8 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.lista_produtos.column("estoque", width=75)
         self.lista_produtos.column("fornecedor", width=220)
         self.lista_produtos.column("nf", width=95)
-        self.lista_produtos.column("status", width=125)
         self.lista_produtos.column("grupo", width=150)
+        self.lista_produtos.column("status", width=125)
 
         self.lista_produtos.place(y=88, width=970, height=230)
         # ----------------------------------------------------------------------------------
