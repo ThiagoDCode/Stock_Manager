@@ -5,7 +5,7 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 from tkcalendar import DateEntry
 
-from functions_estoque import Register
+from functions_estoque import FunctionsEstoque
 from functions_entrada import FunctionsEntrada
 from functions_base import Functions
 
@@ -50,7 +50,7 @@ class Application:
         self.tabs_view.set("Entrada de Produtos")
 
 
-class TabEstoque(Register, Functions):
+class TabEstoque(FunctionsEstoque, Functions):
     def __init__(self, root):
         self.root = root
 
@@ -191,7 +191,8 @@ class TabEntrada(FunctionsEntrada, Functions):
         
     def buttons_header(self):
         btn_save = ctk.CTkButton(self.root, image=self.image_button("save.png", (40, 40)), text="", width=30,
-                                compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), command=None)
+                                compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), 
+                                command=self.save)
         btn_save.grid(column=0, row=0, padx=1)
         
     def widgets_top(self):
@@ -218,9 +219,9 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.produto_entry.place(x=185, y=30)
         
         ctk.CTkLabel(self.frame_top, text="Medida", font=("Cascadia Code", 13)).place(x=545, y=5)
-        self.unidade_entry = ctk.CTkEntry(self.frame_top, width=100, justify=CENTER, 
+        self.medida_entry = ctk.CTkEntry(self.frame_top, width=100, justify=CENTER, 
                                           font=("Cascadia Code", 13), fg_color="transparent")
-        self.unidade_entry.place(x=545, y=30)
+        self.medida_entry.place(x=545, y=30)
         
         ctk.CTkLabel(self.frame_top, text="Grupo do Produto", font=("Cascadia Code", 13)).place(x=655, y=5)
         self.grupo_entry = ctk.CTkEntry(self.frame_top, width=150, justify=CENTER, 
@@ -280,7 +281,8 @@ class TabEntrada(FunctionsEntrada, Functions):
     def view_bottom(self):
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'data', 'produto', 'medida', 'lote', 'estoque', 'fornecedor', 'nf', 'status'
+            'id', 'data', 'produto', 'medida', 'lote', 'estoque', 'fornecedor', 'nf', 'status',
+            'grupo', 
         ))
         self.lista_produtos.heading("#0", text="")
         self.lista_produtos.heading("id", text="Registro")
@@ -292,6 +294,7 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.lista_produtos.heading("fornecedor", text="Fornecedor")
         self.lista_produtos.heading("nf", text="NF")
         self.lista_produtos.heading("status", text="Status")
+        self.lista_produtos.heading("grupo", text="Grupo do Produto")
 
         self.lista_produtos.column("#0", width=0, stretch=False)
         self.lista_produtos.column("id", width=50)
@@ -300,9 +303,10 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.lista_produtos.column("medida", width=85)
         self.lista_produtos.column("lote", width=85)
         self.lista_produtos.column("estoque", width=75)
-        self.lista_produtos.column("fornecedor", width=270)
+        self.lista_produtos.column("fornecedor", width=220)
         self.lista_produtos.column("nf", width=95)
-        self.lista_produtos.column("status", width=150)
+        self.lista_produtos.column("status", width=125)
+        self.lista_produtos.column("grupo", width=150)
 
         self.lista_produtos.place(y=88, width=970, height=330)
         # ----------------------------------------------------------------------------------
@@ -313,6 +317,9 @@ class TabEntrada(FunctionsEntrada, Functions):
         self.lista_produtos.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
         scrollbar_y.place(x=970, y=88, width=20, height=245)
         scrollbar_x.place(x=0, y=315, width=970, height=20)
+        
+        # SELECIONA DADOS DA TABELA/TREEVIEW
+        self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
 
         self.select_database()
 
