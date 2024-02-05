@@ -3,6 +3,7 @@ from tkinter import ttk
 import customtkinter as ctk
 
 from con_database import *
+from functions_base import *
 
 
 class FunctionsResumos(Database):
@@ -13,21 +14,8 @@ class FunctionsResumos(Database):
         data_return = Database().dql_database(query_sql)
         for dados in data_return:
             view_target.insert("", END, values=dados)
-
-    def filter_repor(self, static=False):
-        self.lista_repor.delete(*self.lista_repor.get_children())
-        
-        query_select = """
-                SELECT id, status, produto, grupo, medida, estoque, est_mín, repor, custo, total, fornecedor
-                FROM estoque ORDER BY repor DESC
-            """
-        data_return = Database().dql_database(query_select)
-        
-        for dados in data_return:
-            if dados[7] > 0:
-                self.lista_repor.insert("", END, values=dados)
     
-    def filter_repor2(self, static=False):
+    def filter_repor(self, static=False):
         query_select = """
             SELECT id, status, produto, grupo, medida, estoque, est_mín, repor, custo, total, fornecedor
             FROM estoque ORDER BY repor DESC
@@ -38,13 +26,14 @@ class FunctionsResumos(Database):
             for dados in data_return:
                 if dados[7] > 0:
                     self.total_repor += 1
+                    self.valor_repor += dados[9]
         else:
             for dados in data_return:
                 if dados[7] > 0:
                     self.lista_repor.insert("", END, values=dados)
 
 
-class TabResumos(FunctionsResumos):
+class TabResumos(FunctionsResumos, Functions):
     def __init__(self, root):
         self.root = root
         
@@ -62,8 +51,9 @@ class TabResumos(FunctionsResumos):
         todos = f"Todos \n{52} produtos \nR$ {10750.00}"
         
         self.total_repor = 0
-        self.filter_repor2(static=True)
-        repor = f"Repor \n{self.total_repor} produtos \nR$ {350.00}"
+        self.valor_repor = 0
+        self.filter_repor(static=True)
+        repor = f"Repor \n{self.total_repor} produtos \nR$ {self.valor_repor}"
         
         excesso = f"Em excesso \n{42} itens \nR$ {7789.34}"
         novos = f"Novos \n{2} produtos \nR$ {297.10}"
@@ -79,6 +69,10 @@ class TabResumos(FunctionsResumos):
                       command=self.view_novos).grid(column=3, row=0, padx=10)
         ctk.CTkButton(self.frame_top, width=175, text=parados, font=("Cascadia Code", 15),
                       command=self.view_parados).grid(column=4, row=0)
+        
+        ctk.CTkButton(self.frame_top, image=self.image_button("atualizar.png", (34, 34)), width=50, text="",
+                      compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"),
+                      command=self.widgets_top).grid(column=5, row=0, padx=10)
         
     def widgets_bottom(self):
         self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=425, border_width=1, border_color="#000")
@@ -288,4 +282,4 @@ class TabResumos(FunctionsResumos):
 
 
 if __name__ == "__main__":
-    FunctionsResumos().filter_repor()
+    pass
