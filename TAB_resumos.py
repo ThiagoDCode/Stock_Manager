@@ -3,6 +3,7 @@ from tkinter import ttk
 import customtkinter as ctk
 
 from con_database import *
+from functions_base import *
 
 
 class FunctionsResumos(Database):
@@ -13,9 +14,26 @@ class FunctionsResumos(Database):
         data_return = Database().dql_database(query_sql)
         for dados in data_return:
             view_target.insert("", END, values=dados)
+    
+    def filter_repor(self, static=False):
+        query_select = """
+            SELECT id, status, produto, grupo, medida, estoque, est_mín, repor, custo, total, fornecedor
+            FROM estoque ORDER BY repor DESC
+        """
+        data_return = Database().dql_database(query_select)
+        
+        if static:
+            for dados in data_return:
+                if dados[7] > 0:
+                    self.total_repor += 1
+                    self.valor_repor += dados[9]
+        else:
+            for dados in data_return:
+                if dados[7] > 0:
+                    self.lista_repor.insert("", END, values=dados)
 
 
-class TabResumos(FunctionsResumos):
+class TabResumos(FunctionsResumos, Functions):
     def __init__(self, root):
         self.root = root
         
@@ -31,7 +49,12 @@ class TabResumos(FunctionsResumos):
         self.frame_top.place(x=1, y=50)
         
         todos = f"Todos \n{52} produtos \nR$ {10750.00}"
-        repor = f"Repor \n{2} produtos \nR$ {350.00}"
+        
+        self.total_repor = 0
+        self.valor_repor = 0
+        self.filter_repor(static=True)
+        repor = f"Repor \n{self.total_repor} produtos \nR$ {self.valor_repor}"
+        
         excesso = f"Em excesso \n{42} itens \nR$ {7789.34}"
         novos = f"Novos \n{2} produtos \nR$ {297.10}"
         parados = f"Parados há 90 dias \n{5} produtos \nR$ {398.56}"
@@ -47,9 +70,21 @@ class TabResumos(FunctionsResumos):
         ctk.CTkButton(self.frame_top, width=175, text=parados, font=("Cascadia Code", 15),
                       command=self.view_parados).grid(column=4, row=0)
         
+        ctk.CTkButton(self.frame_top, image=self.image_button("atualizar.png", (34, 34)), width=50, text="",
+                      compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"),
+                      command=self.widgets_top).grid(column=5, row=0, padx=10)
+        
     def widgets_bottom(self):
         self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=425, border_width=1, border_color="#000")
         self.frame_bottom.place(x=0, y=125)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Produto", font=("Cascadia Code", 13)).place(x=5, y=5)
+        self.produto_search = ctk.CTkEntry(self.frame_bottom, width=250, font=("Cascadia Code", 13))
+        self.produto_search.place(x=65, y=5)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Status", font=("Cascadia Code", 13)).place(x=325, y=5)
+        self.status_search = ctk.CTkEntry(self.frame_bottom, width=125, font=("Cascadia Code", 13))
+        self.status_search.place(x=378, y=5)
         
     def views_todos(self):
         self.lista_todos = ttk.Treeview(self.frame_bottom, height=3, column=(
@@ -62,7 +97,7 @@ class TabResumos(FunctionsResumos):
         self.lista_todos.heading("medida", text="Medida")
         self.lista_todos.heading("estoque", text="Estoque")
         self.lista_todos.heading("valor", text="Valor Estoque")
-        self.lista_todos.heading("data", text="Últ.Registro")
+        self.lista_todos.heading("data", text="Último Registro")
         self.lista_todos.heading("status", text="Status")
         
         self.lista_todos.column("#0", width=0, stretch=False)
@@ -89,39 +124,44 @@ class TabResumos(FunctionsResumos):
         
     def view_repor(self):
         self.lista_repor = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'produto', 'grupo', 'fornecedor', 'estoque', 'repor', 'custo', 'total'
+            'id', 'status', 'produto', 'grupo', 'medida', 'estoque', 'mín', 'repor', 
+            'custo', 'total', 'fornecedor'
         ))
         self.lista_repor.heading("#0", text="")
         self.lista_repor.heading("id", text="Registro")
+        self.lista_repor.heading("status", text="Status Estoque")
         self.lista_repor.heading("produto", text="Produto")
         self.lista_repor.heading("grupo", text="Departamento")
-        self.lista_repor.heading("fornecedor", text="Fornecedor")
+        self.lista_repor.heading("medida", text="Medida")
         self.lista_repor.heading("estoque", text="Estoque")
-        self.lista_repor.heading("repor", text="Reposição")
+        self.lista_repor.heading("mín", text="Est.Mín")
+        self.lista_repor.heading("repor", text="Repor")
         self.lista_repor.heading("custo", text="Custo Médio")
         self.lista_repor.heading("total", text="Custo Total")
+        self.lista_repor.heading("fornecedor", text="Fornecedor")
         
         self.lista_repor.column("#0", width=0, stretch=False)
-        self.lista_repor.column("id", width=50)
+        self.lista_repor.column("id", width=50, anchor=CENTER)
+        self.lista_repor.column("status", width=90, anchor=CENTER)
         self.lista_repor.column("produto", width=270)
         self.lista_repor.column("grupo", width=150)
+        self.lista_repor.column("medida", width=85, anchor=CENTER)
+        self.lista_repor.column("estoque", width=60, anchor=CENTER)
+        self.lista_repor.column("mín", width=50, anchor=CENTER)
+        self.lista_repor.column("repor", width=50, anchor=CENTER)
+        self.lista_repor.column("custo", width=80, anchor=CENTER)
+        self.lista_repor.column("total", width=80, anchor=CENTER)
         self.lista_repor.column("fornecedor", width=150)
-        self.lista_repor.column("estoque", width=60)
-        self.lista_repor.column("repor", width=50)
-        self.lista_repor.column("custo", width=70)
-        self.lista_repor.column("total", width=70)
         
-        self.lista_repor.place(y=40, width=970, height=382)
+        self.lista_repor.place(y=40, width=970, height=362)
         
-        scrollbar = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_repor.yview)
-        self.lista_repor.configure(yscrollcommand=scrollbar.set)
-        scrollbar.place(x=970, y=40, width=20, height=382)
-        
-        query_select = """
-                SELECT id, produto, grupo, fornecedor, estoque, repor, custo, total
-                FROM estoque
-            """
-        self.select_database(query_select, self.lista_repor)
+        scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_repor.yview)
+        scrollbar_x = ttk.Scrollbar(self.frame_bottom, orient="horizontal", command=self.lista_repor.xview)
+        self.lista_repor.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+        scrollbar_y.place(x=970, y=40, width=20, height=382)
+        scrollbar_x.place(x=0, y=401, width=970, height=20)
+
+        self.filter_repor()
 
     def view_excesso(self):
         self.lista_excesso = ttk.Treeview(self.frame_bottom, height=3, column=(
@@ -239,3 +279,7 @@ class TabResumos(FunctionsResumos):
             FROM estoque
         """
         self.select_database(query_select, self.lista_parados)
+
+
+if __name__ == "__main__":
+    pass
