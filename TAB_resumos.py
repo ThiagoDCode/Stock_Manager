@@ -30,14 +30,14 @@ class FunctionsResumos(Database):
             for dados in data_return:
                 self.lista_todos.insert("", END, values=dados)
     
-    def filter_repor(self, static=False):
+    def filter_repor(self, resumo=False):
         query_select = """
             SELECT id, status, produto, grupo, medida, estoque, est_mín, repor, custo, total, fornecedor
             FROM estoque ORDER BY repor DESC
         """
         data_return = Database().dql_database(query_select)
         
-        if static:
+        if resumo:
             for dados in data_return:
                 if dados[7] > 0:
                     self.total_repor += 1
@@ -46,6 +46,23 @@ class FunctionsResumos(Database):
             for dados in data_return:
                 if dados[7] > 0:
                     self.lista_repor.insert("", END, values=dados)
+
+    def filter_movimentos(self, resumo=False):
+        query_select = """
+            SELECT id, produto, medida, estoque, valor, entradas, saídas, custo, revenda, status, data, faturamento
+            FROM estoque ORDER BY data DESC
+        """
+        data_return = Database().dql_database(query_select)
+
+        if resumo:
+            for dados in data_return:
+                if dados[5] > 0 or dados[6] > 0:
+                    self.total_movimentos += 1
+                    self.valor_faturamento += dados[11]
+        else:
+            for dados in data_return:
+                if dados[5] > 0 or dados[6] > 0:
+                    self.lista_movimentos.insert("", END, values=dados)
 
 
 class TabResumos(FunctionsResumos, Functions):
@@ -70,10 +87,13 @@ class TabResumos(FunctionsResumos, Functions):
         
         self.total_repor = 0
         self.valor_repor = 0
-        self.filter_repor(static=True)
+        self.filter_repor(resumo=True)
         repor = f"Repor \n{self.total_repor} produtos \nR$ {self.valor_repor:.2f}"
         
-        excesso = f"Movimentos \n{42} itens \nR$ {7789.34}"
+        self.total_movimentos = 0
+        self.valor_faturamento = 0
+        self.filter_movimentos(resumo=True)
+        excesso = f"Movimentos \n{self.total_movimentos} produtos \nR$ {self.valor_faturamento:.2f}"
         
         
         
@@ -181,49 +201,47 @@ class TabResumos(FunctionsResumos, Functions):
         self.filter_repor()
 
     def view_movimentos(self):
-        self.lista_excesso = ttk.Treeview(self.frame_bottom, height=3, column=(
+        self.lista_movimentos = ttk.Treeview(self.frame_bottom, height=3, column=(
             'id', 'produto', 'medida', 'estoque', 'valor', 'entradas', 'saídas', 'custo',
-            'revenda', 'status', 'data'
+            'revenda', 'status', 'data', 'faturamento'
         ))
-        self.lista_excesso.heading("#0", text="")
-        self.lista_excesso.heading("id", text="Registro")
-        self.lista_excesso.heading("produto", text="Produto")
-        self.lista_excesso.heading("medida", text="Medida")
-        self.lista_excesso.heading("estoque", text="Estoque")
-        self.lista_excesso.heading("valor", text="Valor do Estoque")
-        self.lista_excesso.heading("entradas", text="Entradas")
-        self.lista_excesso.heading("saídas", text="Saídas")
-        self.lista_excesso.heading("custo", text="Valor de Entrada")
-        self.lista_excesso.heading("revenda", text="Valor de Saída")
-        self.lista_excesso.heading("status", text="Status")
+        self.lista_movimentos.heading("#0", text="")
+        self.lista_movimentos.heading("id", text="Registro")
+        self.lista_movimentos.heading("produto", text="Produto")
+        self.lista_movimentos.heading("medida", text="Medida")
+        self.lista_movimentos.heading("estoque", text="Estoque")
+        self.lista_movimentos.heading("valor", text="Valor do Estoque")
+        self.lista_movimentos.heading("entradas", text="Entradas")
+        self.lista_movimentos.heading("saídas", text="Saídas")
+        self.lista_movimentos.heading("custo", text="Valor de Entrada")
+        self.lista_movimentos.heading("revenda", text="Valor de Saída")
+        self.lista_movimentos.heading("status", text="Status")
         
-        self.lista_excesso.heading("data", text="")
+        self.lista_movimentos.heading("data", text="")
+        self.lista_movimentos.heading("faturamento", text="")
         
-        self.lista_excesso.column("#0", width=0, stretch=False)
-        self.lista_excesso.column("id", width=50)
-        self.lista_excesso.column("produto", width=270)
-        self.lista_excesso.column("medida", width=85)
-        self.lista_excesso.column("estoque", width=50)
-        self.lista_excesso.column("valor", width=90)
-        self.lista_excesso.column("entradas", width=50)
-        self.lista_excesso.column("saídas", width=50)
-        self.lista_excesso.column("custo", width=85)
-        self.lista_excesso.column("revenda", width=75)
-        self.lista_excesso.column("status", width=75)
+        self.lista_movimentos.column("#0", width=0, stretch=False)
+        self.lista_movimentos.column("id", width=50)
+        self.lista_movimentos.column("produto", width=270)
+        self.lista_movimentos.column("medida", width=85)
+        self.lista_movimentos.column("estoque", width=50)
+        self.lista_movimentos.column("valor", width=90)
+        self.lista_movimentos.column("entradas", width=50)
+        self.lista_movimentos.column("saídas", width=50)
+        self.lista_movimentos.column("custo", width=87)
+        self.lista_movimentos.column("revenda", width=75)
+        self.lista_movimentos.column("status", width=75)
         
-        self.lista_excesso.column("data", width=0, stretch=False)
+        self.lista_movimentos.column("data", width=0, stretch=False)
+        self.lista_movimentos.column("faturamento", width=0, stretch=False)
         
-        self.lista_excesso.place(y=40, width=970, height=382)
+        self.lista_movimentos.place(y=40, width=970, height=382)
         
-        scrollbar = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_excesso.yview)
-        self.lista_excesso.configure(yscrollcommand=scrollbar.set)
+        scrollbar = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_movimentos.yview)
+        self.lista_movimentos.configure(yscrollcommand=scrollbar.set)
         scrollbar.place(x=970, y=40, width=20, height=382)
-        
-        query_select = """
-            SELECT id, produto, medida, estoque, valor, entradas, saídas, custo, revenda, status, data
-            FROM estoque
-        """
-        self.select_database(query_select, self.lista_excesso)
+
+        self.filter_movimentos()
 
     def view_novos(self):
         self.lista_novos = ttk.Treeview(self.frame_bottom, height=3, column=(
