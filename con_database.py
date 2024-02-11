@@ -4,7 +4,7 @@ from tkinter import messagebox
 import os
 
 caminho = os.path.dirname(__file__) 
-connection = sqlite3.connect(caminho + "/stockDatabase.db")
+connection = sqlite3.connect(caminho + "/StockDatabase.db")
 
 
 class Database:
@@ -39,32 +39,42 @@ class Database:
             messagebox.showerror(f"{e}", message="Não foi possível realizar o registro!")
         else:
             messagebox.showinfo("Successfully", message="Registro excluído com sucesso!")
-        
-    def all_select_db(self):
-        pass
 
 
 def create_table():
     table = """
-        CREATE TABLE estoque (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            produto TEXT(50),
-            grupo TEXT(30),
-            medida TEXT,
-            estoque INTEGER,
-            est_mín INTEGER,
-            fornecedor TEXT(50),
-            responsável TEXT(50),
-            NF TEXT,
-            fone_1 TEXT(14),
-            fone_2 TEXT(14)
-        );
+    CREATE TABLE IF NOT EXISTS stock (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        produto TEXT(30),
+        grupo TEXT(15),
+        medida TEXT,
+        lote TEXT,
+        estoque INTEGER,
+        valor_estoque REAL AS (estoque * revenda),
+        estoque_mín INTEGER,
+        fornecedor TEXT(15),
+        NF TEXT,
+        responsável TEXT(15),
+        fone1 TEXT,
+        fone2 TEXT,
+        entradas INTEGER,
+        data_entrada TEXT,
+        saídas INTEGER,
+        data_saída TEXT,
+        revenda REAL,
+        faturamento REAL AS (saídas * revenda),
+        repor INTEGER AS (estoque_mín - estoque),
+        custo REAL,
+        total_custo REAL AS (repor * custo),
+        gestor TEXT(15)
+    );
     """
 
     try:
         with connection:
             con = connection.cursor()
             con.execute(table)
+            print("Tabela criada com sucesso!")
     except Error as e:
         print(e)
 
