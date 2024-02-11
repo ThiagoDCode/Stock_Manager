@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 import customtkinter as ctk
+from datetime import date
 
 from con_database import *
 from functions_base import *
@@ -63,6 +64,24 @@ class FunctionsResumos(Database):
             for dados in data_return:
                 if dados[5] > 0 or dados[6] > 0:
                     self.lista_movimentos.insert("", END, values=dados)
+    
+    def filter_novos(self, resumo=False):
+        query_select = """
+                SELECT id, data, produto, grupo, medida, lote, entradas, estoque, fornecedor, custo, total, status
+                FROM estoque ORDER BY data DESC
+            """
+        data_return = Database().dql_database(query_select)
+
+        if resumo:
+            for dados in data_return:
+                pass
+        else:
+            for dados in data_return:
+                ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
+                data = date.today() - date(ano, mes, dia)
+                
+                if data.days <= 30:
+                    self.lista_novos.insert("", END, values=dados)
 
 
 class TabResumos(FunctionsResumos, Functions):
@@ -245,7 +264,7 @@ class TabResumos(FunctionsResumos, Functions):
 
     def view_novos(self):
         self.lista_novos = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'data', 'produto', 'grupo', 'medida', 'lote', 'estoque', 'fornecedor', 
+            'id', 'data', 'produto', 'grupo', 'medida', 'lote', 'entradas', 'estoque', 'fornecedor',
             'custo', 'total', 'status'
         ))
         self.lista_novos.heading("#0", text="")
@@ -255,6 +274,7 @@ class TabResumos(FunctionsResumos, Functions):
         self.lista_novos.heading("grupo", text="Departamento")
         self.lista_novos.heading("medida", text="Medida")
         self.lista_novos.heading("lote", text="Nº Lote")
+        self.lista_novos.heading("entradas", text="Entradas")
         self.lista_novos.heading("estoque", text="Estoque")
         self.lista_novos.heading("fornecedor", text="Fornecedor")
         self.lista_novos.heading("custo", text="Custo Médio")
@@ -268,6 +288,7 @@ class TabResumos(FunctionsResumos, Functions):
         self.lista_novos.column("grupo", width=150)
         self.lista_novos.column("medida", width=85)
         self.lista_novos.column("lote", width=85)
+        self.lista_novos.column("entradas", width=55)
         self.lista_novos.column("estoque", width=60)
         self.lista_novos.column("fornecedor", width=150)
         self.lista_novos.column("custo", width=80)
@@ -282,11 +303,7 @@ class TabResumos(FunctionsResumos, Functions):
         scrollbar_y.place(x=970, y=40, width=20, height=382)
         scrollbar_x.place(x=0, y=401, width=970, height=20)
         
-        query_select = """
-                SELECT id, data, produto, grupo, medida, lote, estoque, fornecedor, custo, total, status
-                FROM estoque
-            """
-        self.select_database(query_select, self.lista_novos)
+        self.filter_novos()
 
     def view_parados(self):
         self.lista_parados = ttk.Treeview(self.frame_bottom, height=3, column=(
