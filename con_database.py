@@ -19,17 +19,24 @@ class Database:
         else:
             messagebox.showinfo("Successfully", message="Registro realizado com sucesso!")
     
-    def dql_database(self, query_sql):
+    def dql_database(self, query_sql, column_names=False):
         try:
             with connection:
                 con = connection.cursor()
                 con.execute(query_sql)
                 response = con.fetchall()
+                
+                if column_names:
+                    lista_columns = []
+                    for i in set(response):
+                        lista_columns.append(i[0])
+                    return lista_columns
+        
         except Error as e:
             messagebox.showerror(f"{e}", message="Não foi possível encontrar o registro!")
         else:
             return response
-    
+        
     def dml_delete(self, id_target_delete):
         try:
             with connection:
