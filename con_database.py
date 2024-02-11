@@ -30,11 +30,11 @@ class Database:
         else:
             return response
     
-    def dml_delete(self, dados):
+    def dml_delete(self, id_target_delete):
         try:
             with connection:
                 con = connection.cursor()
-                con.execute(f"DELETE FROM estoque WHERE id='{dados}'")
+                con.execute(f"DELETE FROM estoque WHERE id='{id_target_delete}'")
         except Error as e:
             messagebox.showerror(f"{e}", message="Não foi possível realizar o registro!")
         else:
@@ -49,11 +49,11 @@ def create_table():
         grupo TEXT(15),
         medida TEXT,
         lote TEXT,
-        estoque INTEGER,
+        estoque INTEGER DEFAULT 0,
         valor_estoque REAL AS (estoque * revenda),
-        estoque_mín INTEGER,
+        estoque_mín INTEGER DEFAULT 0,
         fornecedor TEXT(15),
-        NF TEXT,
+        nf TEXT,
         responsável TEXT(15),
         fone1 TEXT,
         fone2 TEXT,
@@ -61,12 +61,13 @@ def create_table():
         data_entrada TEXT,
         saídas INTEGER,
         data_saída TEXT,
-        revenda REAL,
+        revenda REAL DEFAULT 0,
         faturamento REAL AS (saídas * revenda),
         repor INTEGER AS (estoque_mín - estoque),
-        custo REAL,
+        custo REAL DEFAULT 0,
         total_custo REAL AS (repor * custo),
-        gestor TEXT(15)
+        gestor TEXT(15),
+        status TEXT
     );
     """
 

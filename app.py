@@ -4,6 +4,7 @@ import customtkinter as ctk
 from tkcalendar import DateEntry
 
 from TAB_resumos import *
+from TAB_estoque import TabEstoque
 
 from functions_estoque import FunctionsEstoque
 from functions_entrada import FunctionsEntrada
@@ -44,9 +45,9 @@ class Application:
         TabEstoque(self.tabs_view.tab("Produtos e Estoque"))
 
         self.tabs_view.add("Entrada de Produtos")
-        TabEntrada(self.tabs_view.tab("Entrada de Produtos"))
+        #TabEntrada(self.tabs_view.tab("Entrada de Produtos"))
 
-        self.tabs_view.set("Resumos")
+        self.tabs_view.set("Produtos e Estoque",)
 
 
 class WindowConfig(ctk.CTkToplevel):
@@ -78,7 +79,7 @@ class WindowConfig(ctk.CTkToplevel):
         ctk.CTkButton(self, width=75, text="CANCELAR", font=("Cascadia Code", 15, "bold"),
                       command=self.destroy).place(x=185, y=360)
 
-
+"""
 class TabEstoque(FunctionsEstoque, Functions):
     def __init__(self, root):
         self.root = root
@@ -214,7 +215,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.bind("<Double-1>", self.on_DoubleClick)
         
         self.select_database()
-
+"""
 
 class TabEntrada(FunctionsEntrada, Functions):
     def __init__(self, root):
