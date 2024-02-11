@@ -43,7 +43,7 @@ class Database:
 
 def create_table():
     table = """
-    CREATE TABLE IF NOT EXISTS stock (
+    CREATE TABLE IF NOT EXISTS estoque (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         produto TEXT(30),
         grupo TEXT(15),

@@ -122,8 +122,9 @@ class FunctionsEstoque(Register, Functions):
 
         data_return = Database().dql_database(query_select)
 
-        for dado in data_return:
-            self.lista_produtos.insert("", "end", values=dado)
+        if data_return != None:
+            for dado in data_return:
+                self.lista_produtos.insert("", "end", values=dado)
     
     def on_DoubleClick(self, event):
         self.clear_entries()

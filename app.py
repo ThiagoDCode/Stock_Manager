@@ -38,7 +38,7 @@ class Application:
         self.tabs_view.pack()
 
         self.tabs_view.add("Resumos")
-        TabResumos(self.tabs_view.tab("Resumos"))
+        #TabResumos(self.tabs_view.tab("Resumos"))
 
         self.tabs_view.add("Produtos e Estoque")
         TabEstoque(self.tabs_view.tab("Produtos e Estoque"))
