@@ -6,7 +6,6 @@ from tkcalendar import DateEntry
 from TAB_resumos import *
 from TAB_estoque import TabEstoque
 
-from functions_estoque import FunctionsEstoque
 from functions_entrada import FunctionsEntrada
 from functions_base import Functions
 
@@ -16,14 +15,14 @@ class Application:
         self.root = ctk.CTk()
 
         self.layout_config()
-        self.menu_bar()
+        #self.menu_bar()
         self.tabs_application()
 
         self.root.mainloop()
 
     def layout_config(self):
         self.root.title("Controle de Estoque")
-        self.root.geometry("1000x600")
+        self.root.geometry("1000x630")
         self.root.resizable(False, False)
 
     def menu_bar(self):  
@@ -50,7 +49,7 @@ class Application:
         self.tabs_view.set("Produtos e Estoque",)
 
 
-class WindowConfig(ctk.CTkToplevel, Application):
+class WindowConfig(ctk.CTkToplevel):
     def __init__(self):
         super().__init__()
         

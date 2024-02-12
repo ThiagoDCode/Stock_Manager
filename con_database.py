@@ -73,7 +73,6 @@ def create_table():
         repor INTEGER AS (estoque_mín - estoque),
         custo REAL DEFAULT 0,
         total_custo REAL AS (repor * custo),
-        gestor TEXT(15),
         status TEXT
     );
     """
