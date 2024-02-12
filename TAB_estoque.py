@@ -25,7 +25,7 @@ class FunctionsEstoque(Database):
         self.custo = self.custo_entry.get()
         self.revenda = self.revenda_entry.get()
 
-        self.gestor = self.gestor_entry.get()
+        self.gestor = self.gestor_listBox.get()
         self.data = self.data_registro.get()
         
     def clear_entries(self):
@@ -51,7 +51,7 @@ class FunctionsEstoque(Database):
         query_select = """
             SELECT 
                 id, data_entrada, produto, medida, grupo, fornecedor, estoque, estoque_mín, nf, 
-                status, responsável, fone1, fone2, lote, custo, revenda
+                status, gestor, responsável, fone1, fone2, lote, custo, revenda
             FROM estoque
         """
 
@@ -66,7 +66,7 @@ class FunctionsEstoque(Database):
         self.lista_produtos.selection()
         
         for row in self.lista_produtos.selection():
-            c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16 = self.lista_produtos.item(row, "values")
+            c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17 = self.lista_produtos.item(row, "values")
             self.cod_entry.insert(END, c1)
             self.cod_entry.configure(state=DISABLED)
             self.produto_entry.insert(END, c3)
@@ -76,12 +76,12 @@ class FunctionsEstoque(Database):
             self.estoque_entry.insert(END, c7)
             self.min_entry.insert(END, c8)
             self.nf_entry.insert(END, c9)
-            self.resp_entry.insert(END, c11)
-            self.fone1_entry.insert(END, c12)
-            self.fone2_entry.insert(END, c13)
-            self.lote_entry.insert(END, c14)
-            self.custo_entry.insert(END, c15)
-            self.revenda_entry.insert(END, c16)
+            self.resp_entry.insert(END, c12)
+            self.fone1_entry.insert(END, c13)
+            self.fone2_entry.insert(END, c14)
+            self.lote_entry.insert(END, c15)
+            self.custo_entry.insert(END, c16)
+            self.revenda_entry.insert(END, c17)
     
     def register_product(self):
         self.variables_entries()
@@ -182,8 +182,8 @@ class FunctionsEstoque(Database):
                             id, data_entrada, produto, medida, grupo, fornecedor, estoque, estoque_mín, 
                             nf, status, responsável, fone1, fone2, lote, custo, revenda
                         FROM 
-                            estoque WHERE {target} LIKE '%s' ORDER BY produto ASC
-                        """ % busca
+                            estoque WHERE {target} LIKE '%{busca}%' ORDER BY produto ASC
+                        """
             data_return = self.dql_database(data_query)
 
             for dados in data_return:
@@ -199,7 +199,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.buttons_header()
         self.widgets_top()
         self.widgets_bottom()
-        
+    
     def buttons_header(self):
         btn_add = ctk.CTkButton(self.root, image=self.image_button("add.png", (34, 34)), width=30, text="",
                                 compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), 
@@ -228,11 +228,11 @@ class TabEstoque(FunctionsEstoque, Functions):
         ctk.CTkButton(self.root, width=30, text="|", font=("Arial", 25), fg_color="transparent",).grid(column=4, row=0)
         
         btn_clear = ctk.CTkButton(self.root, image=self.image_button("clear-entries.png", (30, 30)), width=30, text="",
-                      compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"),
-                      command=self.clear_entries)
+                                  compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"),
+                                  command=self.clear_entries)
         btn_clear.grid(column=5, row=0)
         atk.tooltip(btn_clear, "Limpar entradas de dados")
-    
+
     def widgets_top(self):
         self.frame_top = ctk.CTkFrame(self.root, width=990, height=200)
         self.frame_top.place(y=40)
@@ -320,19 +320,21 @@ class TabEstoque(FunctionsEstoque, Functions):
     def widgets_bottom(self):
         self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=308, border_width=1, border_color="#000")
         self.frame_bottom.place(y=245)
+ 
+        lista = self.dql_database("SELECT gestor FROM estoque", column_names=True)
+        ctk.CTkLabel(self.frame_bottom, text="Gestor", font=("Cascadia Code", 13, "bold")).place(x=10, y=279)
+        self.gestor_listBox = ctk.CTkComboBox(self.frame_bottom, width=200, values=lista, font=("Cascadia Code", 15))
+        self.gestor_listBox.set("")
+        self.gestor_listBox.place(x=60, y=279)
         
-        ctk.CTkLabel(self.frame_bottom, text="Gestor", font=("Cascadia Code", 15, "bold")).place(x=10, y=279)
-        self.gestor_entry = ctk.CTkEntry(self.frame_bottom, width=225, font=("Cascadia Code", 15))
-        self.gestor_entry.place(x=70, y=279)
-        
-        ctk.CTkLabel(self.frame_bottom, text="Data", font=("Cascadia Code", 15, "bold")).place(x=305, y=279)
+        ctk.CTkLabel(self.frame_bottom, text="Data", font=("Cascadia Code", 15, "bold")).place(x=285, y=279)
         self.data_registro = DateEntry(self.frame_bottom)
-        self.data_registro.place(x=350, y=285)
+        self.data_registro.place(x=325, y=285)
 
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
             'id', 'data_entrada', 'produto', 'medida', 'grupo', 'fornecedor', 'estoque', 'estoque_mín', 'nf',
-            'status', 'responsável', 'fone1', 'fone2', 'lote', 'custo', 'revenda'
+            'status', 'gestor', 'responsável', 'fone1', 'fone2', 'lote', 'custo', 'revenda'
         ))
         self.lista_produtos.heading("#0", text="")
         self.lista_produtos.heading("id", text="Cód.")
@@ -345,6 +347,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.heading("estoque_mín", text="Etq.Mín.")
         self.lista_produtos.heading("nf", text="NF")
         self.lista_produtos.heading("status", text="Status")
+        self.lista_produtos.heading("gestor", text="Gestor")
 
         self.lista_produtos.heading("responsável", text="")
         self.lista_produtos.heading("fone1", text="")
@@ -364,6 +367,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.column("estoque_mín", width=50, anchor=CENTER)
         self.lista_produtos.column("nf", width=85, anchor=CENTER)
         self.lista_produtos.column("status", width=70, anchor=CENTER)
+        self.lista_produtos.column("gestor", width=125)
 
         self.lista_produtos.column("responsável", width=0, stretch=False)
         self.lista_produtos.column("fone1", width=0, stretch=False)
