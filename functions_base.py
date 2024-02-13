@@ -39,3 +39,9 @@ class Functions:
                     return numbers
                 except FileNotFoundError:
                     messagebox.showerror("Invalid", message="Lote inválido!")
+                    
+    def entry_off(self, event):
+        if (event.state==12 and event.keysym== "c"):
+            return
+        else:
+            return "break"

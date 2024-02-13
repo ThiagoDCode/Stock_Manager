@@ -272,11 +272,12 @@ class TabEstoque(FunctionsEstoque, Functions):
                                        font=("Cascadia Code", 13, "bold"), text_color="#A9A9A9", fg_color="transparent")
         self.cod_entry.place(x=5, y=30)
 
-        ctk.CTkLabel(self.frame_top, text="Produto", font=("Cascadia Code", 13)).place(x=55, y=5)
-        ctk.CTkLabel(self.frame_top, text="(obrigatório)", font=("Cascadia Code", 10, "italic")).place(x=115, y=5)
+        ctk.CTkLabel(self.frame_top, text="Descrição do Produto", font=("Cascadia Code", 13)).place(x=55, y=5)
+        ctk.CTkLabel(self.frame_top, text="(obrigatório)", font=("Cascadia Code", 10, "italic"),
+                     text_color="#FF4500").place(x=220, y=5)
         self.produto_entry = ctk.CTkEntry(self.frame_top, width=350, font=("Cascadia Code", 13), fg_color="transparent")
         self.produto_entry.place(x=55, y=30)
-        
+
         lista = self.dql_database("SELECT grupo FROM estoque", column_names=True)
         ctk.CTkLabel(self.frame_top, text="Departamento", font=("Cascadia Code", 13)).place(x=410, y=5)
         self.grupo_listBox = ctk.CTkComboBox(self.frame_top, width=200, values=lista, font=("Cascadia Code", 13))
@@ -347,12 +348,11 @@ class TabEstoque(FunctionsEstoque, Functions):
                      font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
         
         # CÓDIGO DE BARRAS --------------------------------------------------------------------------------------------
-        self.num_barcode = ctk.CTkEntry(self.frame_top, width=220, height=20, justify=CENTER,
-                                        font=("Cascadia Code", 13, "bold"), corner_radius=3)
+        self.num_barcode = ctk.CTkEntry(self.frame_top, width=220, height=20, justify=CENTER, 
+                                        placeholder_text="Código de Barras", font=("Cascadia Code", 13, "bold"), corner_radius=3)
+        self.num_barcode.bind("<Key>", lambda e: self.entry_off(e))
         self.num_barcode.place(x=765, y=160)
         
-        ctk.CTkLabel(self.frame_top, text="Código de Barras", font=("Cascadia Code", 13, "bold"), 
-                     fg_color="transparent").place(x=810, y=2)
         self.img_barcode = ctk.CTkLabel(self.frame_top, width=222, height=125, text="")
         self.img_barcode.place(x=765, y=30)
 
