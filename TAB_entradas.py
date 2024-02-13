@@ -18,6 +18,8 @@ class TabEntradas(Functions):
 
         self.buttons_header()
         self.widgets_top()
+        self.widgets_bottom()
+        self.view_bottom()
 
     def buttons_header(self):
         btn_save = ctk.CTkButton(self.root, image=self.image_button("save.png", (40, 40)),
@@ -206,3 +208,60 @@ class TabEntradas(Functions):
                                          corner_radius=2)
         self.status_entry.place(x=120, y=145)
         # -----------------------------------------------------------------------------------------------------
+        
+    def widgets_bottom(self):
+        self.frame_bottom = ctk.CTkFrame(self.root, 
+                                         width=990, height=315,
+                                         border_width=1, border_color="#000")
+        self.frame_bottom.place(y=240)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Rastreamento de Lotes - (duplo CLICK para selecionar um produto!)",
+                     font=("Cascadia Code", 12, "bold")
+                     ).place(x=10, y=1)
+        
+    def view_bottom(self):
+        self.lista_produtos = ttk.Treeview(self.frame_bottom, 
+                                           height=3,
+                                           column=(
+                                               'id', 'data', 'produto', 'medida', 'lote', 'estoque', 
+                                               'fornecedor', 'nf', 'grupo', 'status'
+                                           ))
+        
+        self.lista_produtos.heading("#0", text="")
+        self.lista_produtos.heading("id", text="Cód.")
+        self.lista_produtos.heading("data", text="Data")
+        self.lista_produtos.heading("produto", text="Produto")
+        self.lista_produtos.heading("medida", text="Medida")
+        self.lista_produtos.heading("lote", text="Nº Lote")
+        self.lista_produtos.heading("estoque", text="Estoque")
+        self.lista_produtos.heading("fornecedor", text="Fornecedor")
+        self.lista_produtos.heading("nf", text="NF")
+        self.lista_produtos.heading("grupo", text="Departamento")
+        self.lista_produtos.heading("status", text="Status")
+        
+        self.lista_produtos.column("#0", width=0, stretch=False)
+        self.lista_produtos.column("id", width=35)
+        self.lista_produtos.column("data", width=75)
+        self.lista_produtos.column("produto", width=270)
+        self.lista_produtos.column("medida", width=85)
+        self.lista_produtos.column("lote", width=50)
+        self.lista_produtos.column("estoque", width=50)
+        self.lista_produtos.column("fornecedor", width=150)
+        self.lista_produtos.column("nf", width=85)
+        self.lista_produtos.column("grupo", width=125)
+        self.lista_produtos.column("status", width=70)
+        
+        self.lista_produtos.place(y=88, width=970, height=180)
+        
+        # SCROLLBAR -----------------------------------------------------------------------------------------
+        scrollbar_y = ttk.Scrollbar(self.frame_bottom, 
+                                    orient="vertical",
+                                    command=self.lista_produtos.yview)
+        scrollbar_x = ttk.Scrollbar(self.frame_bottom,
+                                    orient="horizontal",
+                                    command=self.lista_produtos.xview)
+        self.lista_produtos.configure(yscrollcommand=scrollbar_y.set, 
+                                      xscrollcommand=scrollbar_x.set)
+        scrollbar_y.place(x=970, y=88, width=20, height=200)
+        scrollbar_x.place(x=0, y=268, width=970, height=20)
+        # ---------------------------------------------------------------------------------------------------
