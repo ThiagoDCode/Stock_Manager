@@ -4,6 +4,7 @@ from tkinter import messagebox
 import customtkinter as ctk
 import awesometkinter as atk
 from tkcalendar import DateEntry
+import os
 
 from con_database import *
 from functions_base import *
@@ -12,11 +13,14 @@ from functions_base import *
 class FunctionsEstoque(Database):
     
     def add_barcode(self):
-        self.num_barcode.delete(0, END)
-        
-        numbers = self.generate_barCode(self.lote_entry.get())
-        if numbers:
-            self.num_barcode.insert(END, numbers)
+        if self.produto_entry.get() == "":
+            messagebox.showinfo("Description", message="Por favor insira a descrição do produto!")
+        else:
+            self.num_barcode.delete(0, END)
+            
+            numbers = self.generate_barCode(self.lote_entry.get())
+            if numbers:
+                self.num_barcode.insert(END, numbers)
     
     def variables_entries(self):
         self.código = self.cod_entry.get()
@@ -101,7 +105,7 @@ class FunctionsEstoque(Database):
             
             if self.num_barcode.get() != "":
                 try:
-                    self.img_barcode.configure(image=self.code_image(f"{self.lote_entry.get()}.png", (222, 125)))
+                    self.img_barcode.configure(image=self.image_barcode(f"{self.lote_entry.get()}.png", (222, 125)))
                 except:
                     messagebox.showinfo("Not found", message="A imagem do código de barras não foi encontrado!")
     
@@ -160,8 +164,10 @@ class FunctionsEstoque(Database):
         if self.código == "" or not self.código.isdigit():
             messagebox.showerror("ID invalid", message="Selecione o produto a ser excluído!")
         else:
-            if messagebox.askyesno("Delete", message="Excluir o registro?"):
+            if messagebox.askyesno("Delete", message=f"Excluir o registro: {self.cod_entry.get()}?"):
                 self.dml_delete(self.código)
+                self.img_barcode.configure(image=None)
+                os.remove(f"./Stock_Manager/barCodes/{self.lote_entry.get()}.png")
 
                 self.widgets_top()
                 self.select_database()
@@ -201,8 +207,8 @@ class FunctionsEstoque(Database):
 
             data_query = f"""
                         SELECT
-                            id, data_entrada, produto, medida, grupo, fornecedor, estoque, estoque_mín, 
-                            nf, status, responsável, fone1, fone2, lote, custo, revenda
+                            id, data_entrada, produto, medida, grupo, fornecedor, lote, estoque, estoque_mín, 
+                            nf, status, responsável, fone1, fone2, custo, revenda, n_barcode
                         FROM 
                             estoque WHERE {target} LIKE '%{busca}%' ORDER BY produto ASC
                         """
@@ -235,7 +241,7 @@ class TabEstoque(FunctionsEstoque, Functions):
                                    compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), 
                                    command=self.search_database)
         btn_search.grid(column=1, row=0, padx=1)
-        atk.tooltip(btn_search, "Buscar Registro \n (Busca por: produto/departamento/lote/fornecedor/NF)")
+        atk.tooltip(btn_search, "Buscar Registro \n (Busca por: produto/departamento/fornecedor/lote/NF)")
 
         btn_update = ctk.CTkButton(self.root, image=self.image_button("update.png", (32, 32)), width=30, text="", 
                                    compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), 

@@ -231,4 +231,5 @@ class TabEntrada(FunctionsEntrada, Functions):
 
 
 if __name__ == "__main__":
+    create_table()
     Application()

@@ -51,30 +51,30 @@ class Database:
 def create_table():
     table = """
     CREATE TABLE IF NOT EXISTS estoque (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        produto TEXT(30),
-        grupo TEXT(15),
-        medida TEXT,
-        lote TEXT,
-        estoque INTEGER DEFAULT 0,
-        valor_estoque REAL AS (estoque * revenda),
-        estoque_mín INTEGER DEFAULT 0,
-        fornecedor TEXT(15),
-        nf TEXT,
-        responsável TEXT(15),
-        fone1 TEXT,
-        fone2 TEXT,
-        entradas INTEGER,
-        data_entrada TEXT,
-        saídas INTEGER,
-        data_saída TEXT,
-        revenda REAL DEFAULT 0,
-        faturamento REAL AS (saídas * revenda),
-        repor INTEGER AS (estoque_mín - estoque),
-        custo REAL DEFAULT 0,
-        total_custo REAL AS (repor * custo),
-        status TEXT,
-        code_bar TEXT DEFAULT ND
+        id              INTEGER     PRIMARY KEY AUTOINCREMENT,
+        produto         TEXT(30),
+        grupo           TEXT(15),
+        medida          TEXT,
+        lote            TEXT,
+        estoque         INTEGER     DEFAULT (0),
+        valor_estoque   REAL        AS (estoque * revenda),
+        estoque_mín     INTEGER     DEFAULT (0),
+        fornecedor      TEXT(20),
+        nf              TEXT,
+        responsável     TEXT(15),
+        fone1           TEXT,
+        fone2           TEXT,
+        entradas        INTEGER,
+        data_entrada    TEXT,
+        saídas          INTEGER,
+        data_saída      TEXT,
+        revenda         REAL        DEFAULT (0),
+        faturamento     REAL        AS (saídas * revenda),
+        repor           INTEGER     AS (estoque_mín - estoque),
+        custo           REAL        DEFAULT (0),
+        total_custo     REAL        AS (repor * custo),
+        status          TEXT,
+        n_barcode       TEXT(20)
     );
     """
 
@@ -82,7 +82,6 @@ def create_table():
         with connection:
             con = connection.cursor()
             con.execute(table)
-            print("Tabela criada com sucesso!")
     except Error as e:
         print(e)
 
