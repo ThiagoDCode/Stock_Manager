@@ -5,6 +5,7 @@ from tkcalendar import DateEntry
 
 from TAB_resumos import *
 from TAB_estoque import TabEstoque
+from TAB_entradas import TabEntradas
 
 from functions_entrada import FunctionsEntrada
 from functions_base import Functions
@@ -43,10 +44,10 @@ class Application:
         self.tabs_view.add("Produtos e Estoque")
         TabEstoque(self.tabs_view.tab("Produtos e Estoque"))
 
-        self.tabs_view.add("Entrada de Produtos")
-        #TabEntrada(self.tabs_view.tab("Entrada de Produtos"))
+        self.tabs_view.add("Entradas")
+        TabEntradas(self.tabs_view.tab("Entradas"))
 
-        self.tabs_view.set("Produtos e Estoque",)
+        self.tabs_view.set("Entradas",)
 
 
 class WindowConfig(ctk.CTkToplevel):
@@ -79,7 +80,7 @@ class WindowConfig(ctk.CTkToplevel):
                       command=self.destroy).place(x=185, y=360)
 
 
-class TabEntrada(FunctionsEntrada, Functions):
+class TabEntrada2(FunctionsEntrada, Functions):
     def __init__(self, root):
         self.root = root
         
