@@ -55,6 +55,7 @@ class FunctionsEstoque(Database):
         self.revenda_entry.delete(0, END)
         
         self.num_barcode.delete(0, END)
+        self.img_barcode.configure(image=None)
     
     def select_database(self):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
@@ -97,6 +98,12 @@ class FunctionsEstoque(Database):
             self.revenda_entry.insert(END, c16)
             
             self.num_barcode.insert(END, c17)
+            
+            if self.num_barcode.get() != "":
+                try:
+                    self.img_barcode.configure(image=self.code_image(f"{self.lote_entry.get()}.png", (222, 125)))
+                except:
+                    messagebox.showinfo("Not found", message="A imagem do código de barras não foi encontrado!")
     
     def register_product(self):
         self.variables_entries()
@@ -334,16 +341,21 @@ class TabEstoque(FunctionsEstoque, Functions):
                      font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
         
         # CÓDIGO DE BARRAS --------------------------------------------------------------------------------------------
-        self.num_barcode = ctk.CTkEntry(self.frame_top)
+        self.num_barcode = ctk.CTkEntry(self.frame_top, width=220, height=20, justify=CENTER,
+                                        font=("Cascadia Code", 13, "bold"), corner_radius=3)
+        self.num_barcode.place(x=765, y=160)
         
-        ctk.CTkLabel(self.frame_top, text="Código de Barras",
-                     font=("Cascadia Code", 13, "bold"), fg_color="transparent").place(x=810, y=2)
-        ctk.CTkLabel(self.frame_top, width=220, height=125, image=None, bg_color="#808080").place(x=765, y=30)
-        
-        ctk.CTkButton(self.frame_top, width=50, height=25,
-                      text="GERAR CODE", font=("Cascadia Code", 12, "bold"),
-                      command=self.add_barcode).place(x=765, y=160)
-        
+        ctk.CTkLabel(self.frame_top, text="Código de Barras", font=("Cascadia Code", 13, "bold"), 
+                     fg_color="transparent").place(x=810, y=2)
+        self.img_barcode = ctk.CTkLabel(self.frame_top, width=222, height=125, text="")
+        self.img_barcode.place(x=765, y=30)
+
+        btn_generate_code = ctk.CTkButton(self.frame_top, width=20, text="",
+                                          image=self.image_button("add_barcode.png", (27, 27)), compound=LEFT, anchor=NW,
+                                          fg_color="transparent", hover_color=("#D3D3D3", "#363636"), command=self.add_barcode)
+        btn_generate_code.place(x=943, y=119)
+        atk.tooltip(btn_generate_code, "Gerar Código de Barras")
+
     def widgets_bottom(self): 
         self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=308)
         self.frame_bottom.place(y=245)

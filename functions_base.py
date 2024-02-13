@@ -15,7 +15,7 @@ class Functions:
                            size=(scale))
         return img
     
-    def code_image(nameImage, scale=tuple):
+    def code_image(self, nameImage, scale=tuple):
         img = ctk.CTkImage(light_image=Image.open("./Stock_Manager/barCodes/" + nameImage),
                            dark_image=Image.open("./Stock_Manager/barCodes/" + nameImage),
                            size=(scale))
@@ -44,10 +44,15 @@ if __name__ == "__main__":
     app.geometry("300x300")
     
     def imprimir():
-        print(code)
+        pass
     
-    code = ctk.CTkButton(app, text="code", command=lambda: Functions().generate_barCode(565)).pack()
-    ctk.CTkButton(app, text="imprimir", command=imprimir).pack()
+    #code = ctk.CTkButton(app, text="code", command=lambda: Functions().generate_barCode(565)).pack()
+    #ctk.CTkButton(app, text="imprimir", command=imprimir).pack()
+    
+    img = PhotoImage(file="./Stock_Manager/barCodes/555.png")
+    
+    frame = ctk.CTkLabel(app, width=200, height=100, image=Functions.code_image("555.png", (200, 100)))
+    frame.pack()
     
     app.mainloop()
 
