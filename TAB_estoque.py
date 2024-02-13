@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 import customtkinter as ctk
 import awesometkinter as atk
 from tkcalendar import DateEntry
@@ -9,6 +10,13 @@ from functions_base import *
 
 
 class FunctionsEstoque(Database):
+    
+    def add_barcode(self):
+        self.num_barcode.delete(0, END)
+        
+        numbers = self.generate_barCode(self.lote_entry.get())
+        if numbers:
+            self.num_barcode.insert(END, numbers)
     
     def variables_entries(self):
         self.código = self.cod_entry.get()
@@ -27,6 +35,7 @@ class FunctionsEstoque(Database):
         self.revenda = self.revenda_entry.get()
 
         self.data = self.data_registro.get()
+        self.barcode = self.num_barcode.get()
         
     def clear_entries(self):
         self.cod_entry.configure(state=NORMAL)
@@ -44,14 +53,16 @@ class FunctionsEstoque(Database):
         self.min_entry.delete(0, END)
         self.custo_entry.delete(0, END)
         self.revenda_entry.delete(0, END)
+        
+        self.num_barcode.delete(0, END)
     
     def select_database(self):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
 
         query_select = """
             SELECT 
-                id, data_entrada, produto, medida, grupo, fornecedor, estoque, estoque_mín, nf, 
-                status, responsável, fone1, fone2, lote, custo, revenda
+                id, data_entrada, produto, medida, grupo, fornecedor, lote, estoque, estoque_mín, nf, 
+                status, responsável, fone1, fone2, custo, revenda, n_barcode
             FROM estoque
         """
 
@@ -68,22 +79,24 @@ class FunctionsEstoque(Database):
         self.lista_produtos.selection()
         
         for row in self.lista_produtos.selection():
-            c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16 = self.lista_produtos.item(row, "values")
+            c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17 = self.lista_produtos.item(row, "values")
             self.cod_entry.insert(END, c1)
             self.cod_entry.configure(state=DISABLED)
             self.produto_entry.insert(END, c3)
             self.medida_listBox.set(c4)
             self.grupo_listBox.set(c5)
             self.fornecedor_listBox.set(c6)
-            self.estoque_entry.insert(END, c7)
-            self.min_entry.insert(END, c8)
-            self.nf_entry.insert(END, c9)
-            self.resp_entry.insert(END, c11)
-            self.fone1_entry.insert(END, c12)
-            self.fone2_entry.insert(END, c13)
-            self.lote_entry.insert(END, c14)
+            self.lote_entry.insert(END, c7)
+            self.estoque_entry.insert(END, c8)
+            self.min_entry.insert(END, c9)
+            self.nf_entry.insert(END, c10)
+            self.resp_entry.insert(END, c12)
+            self.fone1_entry.insert(END, c13)
+            self.fone2_entry.insert(END, c14)
             self.custo_entry.insert(END, c15)
             self.revenda_entry.insert(END, c16)
+            
+            self.num_barcode.insert(END, c17)
     
     def register_product(self):
         self.variables_entries()
@@ -95,13 +108,13 @@ class FunctionsEstoque(Database):
             query_sql = """
                 INSERT INTO estoque (
                     produto, grupo, medida, fornecedor, responsável, fone1, fone2, nf, 
-                    lote, estoque, estoque_mín, custo, revenda, data_entrada
+                    lote, estoque, estoque_mín, custo, revenda, data_entrada, n_barcode
                     )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
             
             lista_dados = [self.produto, self.grupo, self.medida, self.fornecedor, 
                            self.resp, self.fone1, self.fone2, self.nf, self.lote, self.estoque, 
-                           self.min, self.custo, self.revenda, self.data]
+                           self.min, self.custo, self.revenda, self.data, self.barcode]
 
             self.dml_database(query_sql, lista_dados)
 
@@ -120,11 +133,12 @@ class FunctionsEstoque(Database):
                 query_sql = """
                     UPDATE estoque SET
                         produto=?, grupo=?, medida=?, lote=?, fornecedor=?, responsável=?, fone1=?, fone2=?,
-                        nf=?, estoque=?, estoque_mín=?, custo=?, revenda=?, data_entrada=?
+                        nf=?, estoque=?, estoque_mín=?, custo=?, revenda=?, data_entrada=?, n_barcode=?
                     WHERE id=?
                 """
-                lista_dados = [self.produto, self.grupo, self.medida, self.lote, self.fornecedor, self.resp, 
-                               self.fone1, self.fone2, self.nf, self.estoque, self.min, self.custo, self.revenda, self.data,
+                lista_dados = [self.produto, self.grupo, self.medida, self.lote, self.fornecedor, 
+                               self.resp, self.fone1, self.fone2, self.nf, self.estoque, self.min, 
+                               self.custo, self.revenda, self.data, self.barcode,
                                self.código]
 
                 if messagebox.askyesno("Update", message="Atualizar Registro?"):
@@ -315,11 +329,20 @@ class TabEstoque(FunctionsEstoque, Functions):
                                           font=("Cascadia Code", 13), fg_color="#363636", bg_color="#363636")
         self.revenda_entry.place(x=165, y=85)
         #--------------------------------------------------------------------------------------------------------------
-
-        ctk.CTkLabel(self.frame_top, text="IMAGEM", width=220, height=190, bg_color="#808080").place(x=765, y=5)
-
-        ctk.CTkLabel(self.frame_top, text="Duplo CLICK para selecionar um produto!", 
+        
+        ctk.CTkLabel(self.frame_top, text="Duplo CLICK para selecionar um produto!",
                      font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
+        
+        # CÓDIGO DE BARRAS --------------------------------------------------------------------------------------------
+        self.num_barcode = ctk.CTkEntry(self.frame_top)
+        
+        ctk.CTkLabel(self.frame_top, text="Código de Barras",
+                     font=("Cascadia Code", 13, "bold"), fg_color="transparent").place(x=810, y=2)
+        ctk.CTkLabel(self.frame_top, width=220, height=125, image=None, bg_color="#808080").place(x=765, y=30)
+        
+        ctk.CTkButton(self.frame_top, width=50, height=25,
+                      text="GERAR CODE", font=("Cascadia Code", 12, "bold"),
+                      command=self.add_barcode).place(x=765, y=160)
         
     def widgets_bottom(self): 
         self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=308)
@@ -331,8 +354,8 @@ class TabEstoque(FunctionsEstoque, Functions):
 
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'data_entrada', 'produto', 'medida', 'grupo', 'fornecedor', 'estoque', 'estoque_mín', 'nf',
-            'status', 'responsável', 'fone1', 'fone2', 'lote', 'custo', 'revenda'
+            'id', 'data_entrada', 'produto', 'medida', 'grupo', 'fornecedor', 'lote', 'estoque', 'estoque_mín', 'nf',
+            'status', 'responsável', 'fone1', 'fone2', 'custo', 'revenda', 'barcode'
         ))
         self.lista_produtos.heading("#0", text="")
         self.lista_produtos.heading("id", text="Cód.")
@@ -341,6 +364,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.heading("medida", text="Medida")
         self.lista_produtos.heading("grupo", text="Departamento")
         self.lista_produtos.heading("fornecedor", text="Fornecedor")
+        self.lista_produtos.heading("lote", text="Nº Lote")
         self.lista_produtos.heading("estoque", text="Estoque")
         self.lista_produtos.heading("estoque_mín", text="Etq.Mín.")
         self.lista_produtos.heading("nf", text="NF")
@@ -349,9 +373,9 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.heading("responsável", text="")
         self.lista_produtos.heading("fone1", text="")
         self.lista_produtos.heading("fone2", text="")
-        self.lista_produtos.heading("lote", text="")
         self.lista_produtos.heading("custo", text="")
         self.lista_produtos.heading("revenda", text="")
+        self.lista_produtos.heading("barcode", text="")
 
         self.lista_produtos.column("#0", width=0, stretch=False)
         self.lista_produtos.column("id", width=35, anchor=CENTER)
@@ -360,6 +384,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.column("medida", width=85, anchor=CENTER)
         self.lista_produtos.column("grupo", width=125)
         self.lista_produtos.column("fornecedor", width=150)
+        self.lista_produtos.column("lote", width=50, anchor=CENTER)
         self.lista_produtos.column("estoque", width=50, anchor=CENTER)
         self.lista_produtos.column("estoque_mín", width=50, anchor=CENTER)
         self.lista_produtos.column("nf", width=85, anchor=CENTER)
@@ -368,11 +393,11 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.column("responsável", width=0, stretch=False)
         self.lista_produtos.column("fone1", width=0, stretch=False)
         self.lista_produtos.column("fone2", width=0, stretch=False)
-        self.lista_produtos.column("lote", width=0, stretch=False)
         self.lista_produtos.column("custo", width=0, stretch=False)
         self.lista_produtos.column("revenda", width=0, stretch=False)
+        self.lista_produtos.column("barcode", width=0, stretch=False)
 
-        self.lista_produtos.place(width=970, height=275)
+        self.lista_produtos.place(width=970, height=255)
         # ----------------------------------------------------------------------------------
 
         scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_produtos.yview)
