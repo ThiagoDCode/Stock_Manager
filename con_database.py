@@ -19,22 +19,29 @@ class Database:
         else:
             messagebox.showinfo("Successfully", message="Registro realizado com sucesso!")
     
-    def dql_database(self, query_sql):
+    def dql_database(self, query_sql, column_names=False):
         try:
             with connection:
                 con = connection.cursor()
                 con.execute(query_sql)
                 response = con.fetchall()
+                
+                if column_names:
+                    lista_columns = []
+                    for i in set(response):
+                        lista_columns.append(i[0])
+                    return lista_columns
+        
         except Error as e:
             messagebox.showerror(f"{e}", message="Não foi possível encontrar o registro!")
         else:
             return response
-    
-    def dml_delete(self, dados):
+        
+    def dml_delete(self, id_target_delete):
         try:
             with connection:
                 con = connection.cursor()
-                con.execute(f"DELETE FROM estoque WHERE id='{dados}'")
+                con.execute(f"DELETE FROM estoque WHERE id='{id_target_delete}'")
         except Error as e:
             messagebox.showerror(f"{e}", message="Não foi possível realizar o registro!")
         else:
@@ -44,29 +51,30 @@ class Database:
 def create_table():
     table = """
     CREATE TABLE IF NOT EXISTS estoque (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        produto TEXT(30),
-        grupo TEXT(15),
-        medida TEXT,
-        lote TEXT,
-        estoque INTEGER,
-        valor_estoque REAL AS (estoque * revenda),
-        estoque_mín INTEGER,
-        fornecedor TEXT(15),
-        NF TEXT,
-        responsável TEXT(15),
-        fone1 TEXT,
-        fone2 TEXT,
-        entradas INTEGER,
-        data_entrada TEXT,
-        saídas INTEGER,
-        data_saída TEXT,
-        revenda REAL,
-        faturamento REAL AS (saídas * revenda),
-        repor INTEGER AS (estoque_mín - estoque),
-        custo REAL,
-        total_custo REAL AS (repor * custo),
-        gestor TEXT(15)
+        id              INTEGER     PRIMARY KEY AUTOINCREMENT,
+        produto         TEXT(30),
+        grupo           TEXT(15),
+        medida          TEXT,
+        lote            TEXT,
+        estoque         INTEGER     DEFAULT (0),
+        valor_estoque   REAL        AS (estoque * revenda),
+        estoque_mín     INTEGER     DEFAULT (0),
+        fornecedor      TEXT(20),
+        nf              TEXT,
+        responsável     TEXT(15),
+        fone1           TEXT,
+        fone2           TEXT,
+        entradas        INTEGER,
+        data_entrada    TEXT,
+        saídas          INTEGER,
+        data_saída      TEXT,
+        revenda         REAL        DEFAULT (0),
+        faturamento     REAL        AS (saídas * revenda),
+        repor           INTEGER     AS (estoque_mín - estoque),
+        custo           REAL        DEFAULT (0),
+        total_custo     REAL        AS (repor * custo),
+        status          TEXT,
+        n_barcode       TEXT(20)
     );
     """
 
@@ -74,7 +82,6 @@ def create_table():
         with connection:
             con = connection.cursor()
             con.execute(table)
-            print("Tabela criada com sucesso!")
     except Error as e:
         print(e)
 
