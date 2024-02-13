@@ -96,40 +96,60 @@ class TabEntradas(Functions):
 
         ctk.CTkLabel(self.frame_top, text="Nº Lote",
                      font=("Cascadia Code", 13)
-                     ).place(x=635, y=70)
+                     ).place(x=555, y=70)
         self.lote_entry = ctk.CTkEntry(self.frame_top,
                                        width=65,
                                        justify=CENTER,
                                        font=("Cascadia Code", 13),
                                        fg_color="transparent")
-        self.lote_entry.place(x=635, y=95)
+        self.lote_entry.place(x=555, y=95)
 
         lista_medida = ""
         ctk.CTkLabel(self.frame_top, text="Medida",
                      font=("Cascadia Code", 13)
-                     ).place(x=710, y=70)
+                     ).place(x=630, y=70)
         self.medida_listBox = ctk.CTkComboBox(self.frame_top,
                                               width=115,
                                               values=lista_medida,
                                               font=("Cascadia Code", 13),
                                               justify=CENTER)
         self.medida_listBox.set("")
-        self.medida_listBox.place(x=710, y=95)
-
-        ctk.CTkLabel(self.frame_top, text="Status Lote",
-                     font=("Cascadia Code", 13)
-                     ).place(x=860, y=130)
-        self.status_entry = ctk.CTkEntry(self.frame_top,
-                                         width=100,
-                                         justify=CENTER, font=(
-                                             "Cascadia Code", 13),
-                                         fg_color="transparent",
-                                         corner_radius=2)
-        self.status_entry.place(x=860, y=155)
+        self.medida_listBox.place(x=630, y=95)
+        
+        self.barcode_entry = ctk.CTkEntry(self.frame_top, 
+                                          width=220, height=20, 
+                                          justify=CENTER, 
+                                          placeholder_text="Código de Barras", 
+                                          font=("Cascadia Code", 13, "bold"), 
+                                          corner_radius=3)
+        self.barcode_entry.bind("<Key>", lambda e: self.entry_off(e))
+        self.barcode_entry.place(x=5, y=160)
+        
+        ctk.CTkLabel(self.frame_top, text="VALOR DE ENTRADA",
+                     font=("Cascadia Code", 12, "bold")
+                     ).place(x=515, y=130)
+        self.valor_revenda = ctk.CTkEntry(self.frame_top,
+                                          width=110,
+                                          justify=CENTER,
+                                          font=("Cascadia Code", 13),
+                                          placeholder_text="R$ custos",
+                                          fg_color="transparent")
+        self.valor_revenda.place(x=515, y=160)
+        
+        ctk.CTkLabel(self.frame_top, text="VALOR DE SAÍDA",
+                     font=("Cascadia Code", 12, "bold")
+                     ).place(x=635, y=130)
+        self.valor_revenda = ctk.CTkEntry(self.frame_top,
+                                          width=110,
+                                          justify=CENTER,
+                                          font=("Cascadia Code", 13), 
+                                          placeholder_text="R$ revenda",
+                                          fg_color="transparent")
+        self.valor_revenda.place(x=635, y=160)
 
         # SUB_FRAME ENTRADAS ---------------------------------------------------------------------------------
         self.frame_entradas = atk.Frame3d(self.frame_top)
-        self.frame_entradas.place(x=830, y=5, width=155, height=130)
+        self.frame_entradas.place(x=755, y=5, width=230, height=185)
 
         ctk.CTkLabel(self.frame_entradas, text="Qtd. Entrada",
                      font=("Cascadia Code", 13),
@@ -161,4 +181,28 @@ class TabEntradas(Functions):
                      font=("Cascadia Code", 13, "italic"), text_color="#A9A9A9",
                      fg_color="#363636", bg_color="#C0C0C0"
                      ).place(x=90, y=90)
+        
+        ctk.CTkLabel(self.frame_entradas, text="Estoque Mín.",
+                     font=("Cascadia Code", 13),
+                     fg_color="#363636", bg_color="#363636"
+                     ).place(x=10, y=120)
+        self.estoque_entry = ctk.CTkEntry(self.frame_entradas,
+                                          width=75,
+                                          justify=CENTER,
+                                          font=("Cascadia Code", 13, "bold"),
+                                          fg_color="#363636", bg_color="#363636",
+                                          corner_radius=3)
+        self.estoque_entry.place(x=10, y=145)
+        
+        ctk.CTkLabel(self.frame_entradas, text="Status Lote",
+                     font=("Cascadia Code", 13),
+                     fg_color="#363636", bg_color="#363636"
+                     ).place(x=126, y=120)
+        self.status_entry = ctk.CTkEntry(self.frame_entradas,
+                                         width=100,
+                                         justify=CENTER, 
+                                         font=("Cascadia Code", 13, "bold"),
+                                         fg_color="#363636", bg_color="#363636",
+                                         corner_radius=2)
+        self.status_entry.place(x=120, y=145)
         # -----------------------------------------------------------------------------------------------------
