@@ -123,6 +123,7 @@ class FunctionsEstoque(Database):
                     )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
             
+            if self.estoque == "": self.estoque = 0
             lista_dados = [self.produto, self.grupo, self.medida, self.fornecedor, 
                            self.resp, self.fone1, self.fone2, self.nf, self.lote, self.estoque, 
                            self.min, self.custo, self.revenda, self.data, self.barcode]
@@ -167,7 +168,10 @@ class FunctionsEstoque(Database):
             if messagebox.askyesno("Delete", message=f"Excluir o registro: {self.cod_entry.get()}?"):
                 self.dml_delete(self.código)
                 self.img_barcode.configure(image=None)
-                os.remove(f"./Stock_Manager/barCodes/{self.lote_entry.get()}.png")
+                try:
+                    os.remove(f"./Stock_Manager/barCodes/{self.lote_entry.get()}.png")
+                except:
+                    pass
 
                 self.widgets_top()
                 self.select_database()
