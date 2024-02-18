@@ -29,8 +29,7 @@ class FunctionsEstoque(Database):
         self.medida = self.medida_listBox.get()
         self.fornecedor = self.fornecedor_listBox.get()
         self.resp = self.resp_entry.get()
-        self.fone1 = self.fone1_entry.get()
-        self.fone2 = self.fone2_entry.get()
+        self.fone = self.fone_entry.get()
         self.nf = self.nf_entry.get()
         self.lote = self.lote_entry.get()
         self.estoque = self.estoque_entry.get()
@@ -41,6 +40,8 @@ class FunctionsEstoque(Database):
         self.data = self.data_registro.get()
         self.barcode = self.num_barcode.get()
         
+        self.ativo = self.ativo_checkbox.get()
+        
     def clear_entries(self):
         self.cod_entry.configure(state=NORMAL)
         self.cod_entry.delete(0, END)
@@ -49,8 +50,7 @@ class FunctionsEstoque(Database):
         self.medida_listBox.set("")
         self.fornecedor_listBox.set("")
         self.resp_entry.delete(0, END)
-        self.fone1_entry.delete(0, END)
-        self.fone2_entry.delete(0, END)
+        self.fone_entry.delete(0, END)
         self.nf_entry.delete(0, END)
         self.lote_entry.delete(0, END)
         self.estoque_entry.delete(0, END)
@@ -67,7 +67,7 @@ class FunctionsEstoque(Database):
         query_select = """
             SELECT 
                 id, data_entrada, produto, medida, grupo, fornecedor, lote, estoque, estoque_mín, nf, 
-                status, responsável, fone1, fone2, custo, revenda, n_barcode
+                status, responsável, fone, custo, revenda, n_barcode, ativo
             FROM estoque
         """
 
@@ -96,18 +96,18 @@ class FunctionsEstoque(Database):
             self.min_entry.insert(END, c9)
             self.nf_entry.insert(END, c10)
             self.resp_entry.insert(END, c12)
-            self.fone1_entry.insert(END, c13)
-            self.fone2_entry.insert(END, c14)
-            self.custo_entry.insert(END, c15)
-            self.revenda_entry.insert(END, c16)
+            self.fone_entry.insert(END, c13)
+            self.custo_entry.insert(END, c14)
+            self.revenda_entry.insert(END, c15)
             
-            self.num_barcode.insert(END, c17)
-            
+            self.num_barcode.insert(END, c16)
             if self.num_barcode.get() != "":
                 try:
                     self.img_barcode.configure(image=self.image_barcode(f"{self.lote_entry.get()}.png", (222, 125)))
                 except:
                     messagebox.showinfo("Not found", message="A imagem do código de barras não foi encontrado!")
+                    
+            self.check_var.set(c17)
     
     def register_product(self):
         self.variables_entries()
@@ -118,15 +118,15 @@ class FunctionsEstoque(Database):
         else:
             query_sql = """
                 INSERT INTO estoque (
-                    produto, grupo, medida, fornecedor, responsável, fone1, fone2, nf, 
-                    lote, estoque, estoque_mín, custo, revenda, data_entrada, n_barcode
+                    produto, grupo, medida, fornecedor, responsável, fone, nf, 
+                    lote, estoque, estoque_mín, custo, revenda, data_entrada, n_barcode, ativo
                     )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
             
             if self.estoque == "": self.estoque = 0
             lista_dados = [self.produto, self.grupo, self.medida, self.fornecedor, 
-                           self.resp, self.fone1, self.fone2, self.nf, self.lote, self.estoque, 
-                           self.min, self.custo, self.revenda, self.data, self.barcode]
+                           self.resp, self.fone, self.nf, self.lote, self.estoque, 
+                           self.min, self.custo, self.revenda, self.data, self.barcode, self.ativo]
 
             self.dml_database(query_sql, lista_dados)
 
@@ -144,13 +144,13 @@ class FunctionsEstoque(Database):
             else:
                 query_sql = """
                     UPDATE estoque SET
-                        produto=?, grupo=?, medida=?, lote=?, fornecedor=?, responsável=?, fone1=?, fone2=?,
-                        nf=?, estoque=?, estoque_mín=?, custo=?, revenda=?, data_entrada=?, n_barcode=?
+                        produto=?, grupo=?, medida=?, lote=?, fornecedor=?, responsável=?, fone=?,
+                        nf=?, estoque=?, estoque_mín=?, custo=?, revenda=?, data_entrada=?, n_barcode=?, ativo=?
                     WHERE id=?
                 """
                 lista_dados = [self.produto, self.grupo, self.medida, self.lote, self.fornecedor, 
-                               self.resp, self.fone1, self.fone2, self.nf, self.estoque, self.min, 
-                               self.custo, self.revenda, self.data, self.barcode,
+                               self.resp, self.fone, self.nf, self.estoque, self.min, 
+                               self.custo, self.revenda, self.data, self.barcode, self.ativo,
                                self.código]
 
                 if messagebox.askyesno("Update", message="Atualizar Registro?"):
@@ -212,7 +212,7 @@ class FunctionsEstoque(Database):
             data_query = f"""
                         SELECT
                             id, data_entrada, produto, medida, grupo, fornecedor, lote, estoque, estoque_mín, 
-                            nf, status, responsável, fone1, fone2, custo, revenda, n_barcode
+                            nf, status, responsável, fone, custo, revenda, n_barcode
                         FROM 
                             estoque WHERE {target} LIKE '%{busca}%' ORDER BY produto ASC
                         """
@@ -271,55 +271,106 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.frame_top = ctk.CTkFrame(self.root, width=990, height=200)
         self.frame_top.place(y=40)
 
-        ctk.CTkLabel(self.frame_top, text="Código", font=("Cascadia Code", 12.5)).place(x=5, y=5)
-        self.cod_entry = ctk.CTkEntry(self.frame_top, width=45, justify=CENTER, 
-                                       font=("Cascadia Code", 13, "bold"), text_color="#A9A9A9", fg_color="transparent")
+        ctk.CTkLabel(self.frame_top, text="Código", 
+                     font=("Cascadia Code", 12.5)
+                     ).place(x=5, y=5)
+        self.cod_entry = ctk.CTkEntry(self.frame_top, 
+                                      width=45, 
+                                      justify=CENTER, 
+                                      font=("Cascadia Code", 13, "bold"), text_color="#A9A9A9", 
+                                      fg_color="transparent")
         self.cod_entry.place(x=5, y=30)
 
-        ctk.CTkLabel(self.frame_top, text="Descrição do Produto", font=("Cascadia Code", 13)).place(x=55, y=5)
-        ctk.CTkLabel(self.frame_top, text="(obrigatório)", font=("Cascadia Code", 10, "italic"),
-                     text_color="#FF4500").place(x=220, y=5)
-        self.produto_entry = ctk.CTkEntry(self.frame_top, width=350, font=("Cascadia Code", 13), fg_color="transparent")
+        ctk.CTkLabel(self.frame_top, text="Descrição do Produto", 
+                     font=("Cascadia Code", 13)
+                     ).place(x=55, y=5)
+        ctk.CTkLabel(self.frame_top, text="(obrigatório)", 
+                     font=("Cascadia Code", 10, "italic"), text_color="#FF4500"
+                     ).place(x=220, y=5)
+        self.produto_entry = ctk.CTkEntry(self.frame_top, 
+                                          width=350, 
+                                          font=("Cascadia Code", 13), 
+                                          fg_color="transparent")
         self.produto_entry.place(x=55, y=30)
 
         lista = self.dql_database("SELECT grupo FROM estoque", column_names=True)
-        ctk.CTkLabel(self.frame_top, text="Departamento", font=("Cascadia Code", 13)).place(x=410, y=5)
-        self.grupo_listBox = ctk.CTkComboBox(self.frame_top, width=200, values=lista, font=("Cascadia Code", 13))
+        ctk.CTkLabel(self.frame_top, text="Departamento", 
+                     font=("Cascadia Code", 13)
+                     ).place(x=410, y=5)
+        self.grupo_listBox = ctk.CTkComboBox(self.frame_top, 
+                                             width=200, 
+                                             values=lista, 
+                                             font=("Cascadia Code", 13))
         self.grupo_listBox.set("")
         self.grupo_listBox.place(x=410, y=30)
         
         lista = self.dql_database("SELECT medida FROM estoque", column_names=True)
-        ctk.CTkLabel(self.frame_top, text="Medida", font=("Cascadia Code", 13)).place(x=610, y=5)
-        self.medida_listBox = ctk.CTkComboBox(self.frame_top, width=115, values=lista, 
-                                              font=("Cascadia Code", 13), justify=CENTER)
+        ctk.CTkLabel(self.frame_top, text="Medida", 
+                     font=("Cascadia Code", 13)
+                     ).place(x=610, y=5)
+        self.medida_listBox = ctk.CTkComboBox(self.frame_top, 
+                                              width=115, 
+                                              values=lista, 
+                                              font=("Cascadia Code", 13), 
+                                              justify=CENTER)
         self.medida_listBox.set("")
         self.medida_listBox.place(x=615, y=30)
 
         lista = self.dql_database("SELECT fornecedor FROM estoque", column_names=True)
-        ctk.CTkLabel(self.frame_top, text="Fornecedor", font=("Cascadia Code", 13)).place(x=5, y=60)
-        self.fornecedor_listBox = ctk.CTkComboBox(self.frame_top, width=200, values=lista, font=("Cascadia Code", 13))
+        ctk.CTkLabel(self.frame_top, text="Fornecedor", 
+                     font=("Cascadia Code", 13)
+                     ).place(x=5, y=60)
+        self.fornecedor_listBox = ctk.CTkComboBox(self.frame_top, 
+                                                  width=200, 
+                                                  values=lista, 
+                                                  font=("Cascadia Code", 13))
         self.fornecedor_listBox.set("")
         self.fornecedor_listBox.place(x=5, y=85)
-
-        ctk.CTkLabel(self.frame_top, text="Responsável", font=("Cascadia Code", 13)).place(x=210, y=60)
-        self.resp_entry = ctk.CTkEntry(self.frame_top, width=150, font=("Cascadia Code", 13), fg_color="transparent")
-        self.resp_entry.place(x=210, y=85)
         
-        ctk.CTkLabel(self.frame_top, text="Nº Lote", font=("Cascadia Code", 13)).place(x=395, y=60)
-        self.lote_entry = ctk.CTkEntry(self.frame_top, width=65, justify=CENTER,
-                                       font=("Cascadia Code", 13), fg_color="transparent")
-        self.lote_entry.place(x=395, y=85)
+        ctk.CTkLabel(self.frame_top, text="Nº Lote", 
+                     font=("Cascadia Code", 13)
+                     ).place(x=295, y=60)
+        self.lote_entry = ctk.CTkEntry(self.frame_top, 
+                                       width=65, 
+                                       justify=CENTER,
+                                       font=("Cascadia Code", 13), 
+                                       fg_color="transparent")
+        self.lote_entry.place(x=295, y=85)
+        
+        self.check_var = ctk.StringVar(value="on")
+        self.ativo_checkbox = ctk.CTkCheckBox(self.frame_top, text="LOTE ATIVO", 
+                                         checkbox_width=20, checkbox_height=20,
+                                         font=("Cascadia Code", 12, "bold"),
+                                         corner_radius=15,
+                                         command=None, 
+                                         variable=self.check_var, 
+                                         onvalue="on", offvalue="off")
+        self.ativo_checkbox.place(x=365, y=85)
+        
+        ctk.CTkLabel(self.frame_top, text="Responsável",
+                     font=("Cascadia Code", 13)
+                     ).place(x=5, y=115)
+        self.resp_entry = ctk.CTkEntry(self.frame_top,
+                                       width=150,
+                                       font=("Cascadia Code", 13),
+                                       fg_color="transparent")
+        self.resp_entry.place(x=5, y=140)
 
-        ctk.CTkLabel(self.frame_top, text="Fone 1", font=("Cascadia Code", 13)).place(x=5, y=115)
-        self.fone1_entry = ctk.CTkEntry(self.frame_top, width=140, font=("Cascadia Code", 13), fg_color="transparent")
-        self.fone1_entry.place(x=5, y=140)
+        ctk.CTkLabel(self.frame_top, text="Fone", 
+                     font=("Cascadia Code", 13)
+                     ).place(x=165, y=115)
+        self.fone_entry = ctk.CTkEntry(self.frame_top, 
+                                       width=140, 
+                                       font=("Cascadia Code", 13), 
+                                       fg_color="transparent")
+        self.fone_entry.place(x=165, y=140)
 
-        ctk.CTkLabel(self.frame_top, text="Fone 2", font=("Cascadia Code", 13)).place(x=150, y=115)
-        self.fone2_entry = ctk.CTkEntry(self.frame_top, width=140, font=("Cascadia Code", 13), fg_color="transparent")
-        self.fone2_entry.place(x=150, y=140)
-
-        ctk.CTkLabel(self.frame_top, text="Nota Fiscal", font=("Cascadia Code", 13)).place(x=320, y=115)
-        self.nf_entry = ctk.CTkEntry(self.frame_top, width=140, justify=CENTER,
+        ctk.CTkLabel(self.frame_top, text="Nota Fiscal", 
+                     font=("Cascadia Code", 13)
+                     ).place(x=320, y=115)
+        self.nf_entry = ctk.CTkEntry(self.frame_top, 
+                                     width=140, 
+                                     justify=CENTER,
                                      font=("Cascadia Code", 13), fg_color="transparent")
         self.nf_entry.place(x=320, y=140)
         
@@ -327,24 +378,49 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.sub_frame = atk.Frame3d(self.frame_top, width=285, height=130)
         self.sub_frame.place(x=475, y=65)
         
-        ctk.CTkLabel(self.sub_frame, text="Estoque", font=("Cascadia Code", 13), fg_color="#363636").place(x=15, y=5)
-        self.estoque_entry = ctk.CTkEntry(self.sub_frame, width=100, justify=CENTER,
-                                          font=("Cascadia Code", 13),  fg_color="#363636", bg_color="#363636")
+        ctk.CTkLabel(self.sub_frame, text="Qtd.Entrada", 
+                     font=("Cascadia Code", 13), 
+                     fg_color="#363636"
+                     ).place(x=15, y=5)
+        self.estoque_entry = ctk.CTkEntry(self.sub_frame, 
+                                          width=100, 
+                                          justify=CENTER,
+                                          font=("Cascadia Code", 13),  
+                                          fg_color="#363636", bg_color="#363636")
         self.estoque_entry.place(x=15, y=30)
         
-        ctk.CTkLabel(self.sub_frame, text="Estoque Mín.", font=("Cascadia Code", 13), fg_color="#363636").place(x=165, y=5)
-        self.min_entry = ctk.CTkEntry(self.sub_frame, width=100, justify=CENTER,
-                                      font=("Cascadia Code", 13), fg_color="#363636", bg_color="#363636")
+        ctk.CTkLabel(self.sub_frame, text="Estoque Mín.", 
+                     font=("Cascadia Code", 13), 
+                     fg_color="#363636"
+                     ).place(x=165, y=5)
+        self.min_entry = ctk.CTkEntry(self.sub_frame, 
+                                      width=100, 
+                                      justify=CENTER,
+                                      font=("Cascadia Code", 13), 
+                                      fg_color="#363636", bg_color="#363636")
         self.min_entry.place(x=165, y=30)
         
-        ctk.CTkLabel(self.sub_frame, text="Custo de Entrada", font=("Cascadia Code", 13), fg_color="#363636").place(x=15, y=60)
-        self.custo_entry = ctk.CTkEntry(self.sub_frame, width=100, justify=CENTER,
-                                        font=("Cascadia Code", 13), fg_color="#363636", bg_color="#363636")
+        ctk.CTkLabel(self.sub_frame, text="VALOR DE ENTRADA",
+                     font=("Cascadia Code", 12, "bold"), 
+                     fg_color="#363636"
+                     ).place(x=15, y=60)
+        self.custo_entry = ctk.CTkEntry(self.sub_frame,
+                                        width=100, 
+                                        justify=CENTER,
+                                        placeholder_text="R$ custos",
+                                        font=("Cascadia Code", 13), 
+                                        fg_color="#363636", bg_color="#363636")
         self.custo_entry.place(x=15, y=85)
         
-        ctk.CTkLabel(self.sub_frame, text="Valor de Saída", font=("Cascadia Code", 13), fg_color="#363636").place(x=165, y=60)
-        self.revenda_entry = ctk.CTkEntry(self.sub_frame, width=100, justify=CENTER,
-                                          font=("Cascadia Code", 13), fg_color="#363636", bg_color="#363636")
+        ctk.CTkLabel(self.sub_frame, text="VALOR DE SAÍDA", 
+                     font=("Cascadia Code", 12, "bold"), 
+                     fg_color="#363636").place(x=165, y=60)
+        self.revenda_entry = ctk.CTkEntry(self.sub_frame, 
+                                          width=100, 
+                                          justify=CENTER,
+                                          placeholder_text="R$ revenda",
+                                          font=("Cascadia Code", 13), 
+                                          fg_color="#363636", bg_color="#363636")
         self.revenda_entry.place(x=165, y=85)
         #--------------------------------------------------------------------------------------------------------------
         
@@ -352,17 +428,26 @@ class TabEstoque(FunctionsEstoque, Functions):
                      font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
         
         # CÓDIGO DE BARRAS --------------------------------------------------------------------------------------------
-        self.num_barcode = ctk.CTkEntry(self.frame_top, width=220, height=20, justify=CENTER, 
-                                        placeholder_text="Código de Barras", font=("Cascadia Code", 13, "bold"), corner_radius=3)
+        self.num_barcode = ctk.CTkEntry(self.frame_top, 
+                                        width=220, height=20, 
+                                        justify=CENTER, 
+                                        placeholder_text="Código de Barras", 
+                                        font=("Cascadia Code", 13, "bold"), 
+                                        corner_radius=3)
         self.num_barcode.bind("<Key>", lambda e: self.entry_off(e))
         self.num_barcode.place(x=765, y=160)
         
-        self.img_barcode = ctk.CTkLabel(self.frame_top, width=222, height=125, text="")
+        self.img_barcode = ctk.CTkLabel(self.frame_top, text="", 
+                                        width=222, height=125)
         self.img_barcode.place(x=765, y=30)
 
-        btn_generate_code = ctk.CTkButton(self.frame_top, width=20, text="",
-                                          image=self.image_button("add_barcode.png", (27, 27)), compound=LEFT, anchor=NW,
-                                          fg_color="transparent", hover_color=("#D3D3D3", "#363636"), command=self.add_barcode)
+        btn_generate_code = ctk.CTkButton(self.frame_top, text="",
+                                          width=20,
+                                          image=self.image_button("add_barcode.png", (27, 27)), 
+                                          compound=LEFT, anchor=NW,
+                                          fg_color="transparent", 
+                                          hover_color=("#D3D3D3", "#363636"), 
+                                          command=self.add_barcode)
         btn_generate_code.place(x=943, y=119)
         atk.tooltip(btn_generate_code, "Gerar Código de Barras")
 
@@ -377,7 +462,7 @@ class TabEstoque(FunctionsEstoque, Functions):
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
             'id', 'data_entrada', 'produto', 'medida', 'grupo', 'fornecedor', 'lote', 'estoque', 'estoque_mín', 'nf',
-            'status', 'responsável', 'fone1', 'fone2', 'custo', 'revenda', 'barcode'
+            'status', 'responsável', 'fone', 'custo', 'revenda', 'barcode', 'ativo'
         ))
         self.lista_produtos.heading("#0", text="")
         self.lista_produtos.heading("id", text="Cód.")
@@ -393,11 +478,11 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.heading("status", text="Status")
 
         self.lista_produtos.heading("responsável", text="")
-        self.lista_produtos.heading("fone1", text="")
-        self.lista_produtos.heading("fone2", text="")
+        self.lista_produtos.heading("fone", text="")
         self.lista_produtos.heading("custo", text="")
         self.lista_produtos.heading("revenda", text="")
         self.lista_produtos.heading("barcode", text="")
+        self.lista_produtos.heading("ativo", text="")
 
         self.lista_produtos.column("#0", width=0, stretch=False)
         self.lista_produtos.column("id", width=35, anchor=CENTER)
@@ -413,11 +498,11 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.column("status", width=70, anchor=CENTER)
 
         self.lista_produtos.column("responsável", width=0, stretch=False)
-        self.lista_produtos.column("fone1", width=0, stretch=False)
-        self.lista_produtos.column("fone2", width=0, stretch=False)
+        self.lista_produtos.column("fone", width=0, stretch=False)
         self.lista_produtos.column("custo", width=0, stretch=False)
         self.lista_produtos.column("revenda", width=0, stretch=False)
         self.lista_produtos.column("barcode", width=0, stretch=False)
+        self.lista_produtos.column("ativo", width=0, stretch=False)
 
         self.lista_produtos.place(width=970, height=255)
         # ----------------------------------------------------------------------------------

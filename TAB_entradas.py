@@ -33,26 +33,28 @@ class FunctionsEntradas(Database):
         self.barcode = self.barcode_entry.get()
     
     def clear_entries(self):
-        self.code = self.cod_entry.delete(0, END)
-        self.data = self.data_registro.delete(0, END)
-        self.produto = self.produto_entry.delete(0, END)
-        self.lote = self.lote_entry.delete(0, END)
-        self.nf = self.nf_entry.delete(0, END)
+        self.cod_entry.delete(0, END)
+        self.data_registro.delete(0, END)
+        self.produto_entry.delete(0, END)
+        self.lote_entry.delete(0, END)
+        self.lb_ativo.configure(text="")
+        self.nf_entry.delete(0, END)
 
-        self.medida = self.medida_listBox.set("")
-        self.grupo = self.grupo_listBox.set("")
-        self.fornecedor = self.fornecedor_listBox.set("")
+        self.medida_listBox.set("")
+        self.grupo_listBox.set("")
+        self.fornecedor_listBox.set("")
 
-        self.qtd = self.qtd_entrada.delete(0, END)
-        self.estoque = self.estoque_entry.delete(0, END)
-        self.min = self.min_entry.delete(0, END)
-        self.status = self.status_entry.delete(0, END)
+        self.qtd_entrada.delete(0, END)
+        self.estoque_entry.delete(0, END)
+        self.min_entry.delete(0, END)
+        self.status_entry.delete(0, END)
 
-        self.custo = self.custo_entry.delete(0, END)
-        self.revenda = self.revenda_entry.delete(0, END)
-        self.valor = self.valor_entry.delete(0, END)
+        self.custo_entry.delete(0, END)
+        self.revenda_entry.delete(0, END)
+        self.valor_entry.delete(0, END)
+        self.lb_medida.configure(text="MEDIDA")
 
-        self.barcode = self.barcode_entry.delete(0, END)
+        self.barcode_entry.delete(0, END)
         
     def select_database(self):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
@@ -61,7 +63,7 @@ class FunctionsEntradas(Database):
             SELECT 
                 id, produto, medida, lote, estoque, estoque_mín, 
                 valor_estoque, fornecedor, nf, grupo, status, data_entrada,
-                n_barcode, custo, revenda
+                n_barcode, custo, revenda, ativo
             FROM 
                 estoque
         """
@@ -73,11 +75,10 @@ class FunctionsEntradas(Database):
                 
     def on_doubleClick(self, event):
         self.clear_entries()
-        #self.lista_produtos.selection()
         
         for row in self.lista_produtos.selection():
             c1, c2, c3, c4, c5, c6, c7, c8, \
-                c9, c10, c11, c12, c13, c14, c15 = \
+                c9, c10, c11, c12, c13, c14, c15, c16 = \
                     self.lista_produtos.item(row, "values")
             
             self.cod_entry.insert(END, c1)
@@ -95,6 +96,10 @@ class FunctionsEntradas(Database):
             self.barcode_entry.insert(END, c13)
             self.custo_entry.insert(END, c14)
             self.revenda_entry.insert(END, c15)
+            
+            self.lote_on_off(c16)
+            
+            self.lb_medida.configure(text=self.medida_listBox.get())
     
     def save_register(self):
         self.variables_entries()
@@ -109,11 +114,11 @@ class FunctionsEntradas(Database):
                 
                 query_update = """
                     UPDATE estoque SET
-                        fornecedor=?, nf=?, lote=?, medida=?, estoque=?, estoque_mín=?, custo=?, revenda=?
+                        fornecedor=?, nf=?, lote=?, medida=?, estoque=?, custo=?, revenda=?
                     WHERE id=?
                 """
                 dados = [self.fornecedor, self.nf, self.lote, self.medida, 
-                         add_estoque, self.min, self.custo, self.revenda, 
+                         add_estoque, self.custo, self.revenda, 
                          self.code]
                 self.dml_database(query_update, dados)
             except:
@@ -121,6 +126,29 @@ class FunctionsEntradas(Database):
         
         self.clear_entries()
         self.select_database()
+        
+    def lote_on_off(self, ativo):
+        if ativo == "off":
+            self.medida_listBox.configure(state=DISABLED)
+            self.fornecedor_listBox.configure(state=DISABLED)
+            self.lote_entry.configure(state=DISABLED)
+            self.nf_entry.configure(state=DISABLED)
+            self.qtd_entrada.configure(state=DISABLED)
+            self.custo_entry.configure(state=DISABLED)
+            self.revenda_entry.configure(state=DISABLED)
+            
+            self.lb_ativo.configure(text="LOTE INATIVO")
+        
+        elif ativo == "on":
+            self.medida_listBox.configure(state=NORMAL)
+            self.fornecedor_listBox.configure(state=NORMAL)
+            self.lote_entry.configure(state=NORMAL)
+            self.nf_entry.configure(state=NORMAL)
+            self.qtd_entrada.configure(state=NORMAL)
+            self.custo_entry.configure(state=NORMAL)
+            self.revenda_entry.configure(state=NORMAL)
+            
+            self.lb_ativo.configure(text="LOTE ATIVO")
 
 
 class TabEntradas(FunctionsEntradas, Functions):
@@ -307,10 +335,6 @@ class TabEntradas(FunctionsEntradas, Functions):
                                         font=("Cascadia Code", 13),
                                         fg_color="#363636", bg_color="#363636")
         self.qtd_entrada.place(x=10, y=35)
-        ctk.CTkLabel(self.frame_entradas, text="MEDIDA",
-                     font=("Cascadia Code", 13, "italic"), text_color="#A9A9A9",
-                     fg_color="#363636", bg_color="#C0C0C0"
-                     ).place(x=90, y=35)
 
         ctk.CTkLabel(self.frame_entradas, text="Estoque Lote",
                      font=("Cascadia Code", 13),
@@ -324,21 +348,30 @@ class TabEntradas(FunctionsEntradas, Functions):
                                           corner_radius=3)
         self.estoque_entry.bind("<Key>", lambda e: self.entry_off(e))
         self.estoque_entry.place(x=10, y=90)
-        ctk.CTkLabel(self.frame_entradas, text="MEDIDA",
-                     font=("Cascadia Code", 13, "italic"), text_color="#A9A9A9",
-                     fg_color="#363636", bg_color="#C0C0C0"
-                     ).place(x=90, y=90)
+        self.lb_medida = ctk.CTkLabel(self.frame_entradas, text="MEDIDA", 
+                                      font=("Cascadia Code", 13, "italic"), text_color="#A9A9A9", 
+                                      fg_color="#363636", bg_color="#C0C0C0"
+                                      )
+        self.lb_medida.place(x=90, y=90)
+        
+        self.lb_ativo = ctk.CTkLabel(self.frame_entradas, text="",
+                                     width=105, height=28,
+                                     font=("Cascadia Code", 13, "bold"),
+                                     text_color="#ADFF2F",
+                                     fg_color="#363636", bg_color="#363636")
+        self.lb_ativo.place(x=120, y=65)
         
         ctk.CTkLabel(self.frame_entradas, text="Estoque Mín.",
                      font=("Cascadia Code", 13),
                      fg_color="#363636", bg_color="#363636"
                      ).place(x=10, y=120)
-        self.min_entry = ctk.CTkEntry(self.frame_entradas,
-                                          width=75,
-                                          justify=CENTER,
-                                          font=("Cascadia Code", 13, "bold"),
-                                          fg_color="#363636", bg_color="#363636",
-                                          corner_radius=3)
+        self.min_entry = ctk.CTkEntry(self.frame_entradas, 
+                                      width=75, 
+                                      justify=CENTER,
+                                      font=("Cascadia Code", 13, "bold"), text_color="#A9A9A9",
+                                      fg_color="#363636", bg_color="#363636",
+                                      corner_radius=3)
+        self.min_entry.bind("<Key>", lambda e: self.entry_off(e))
         self.min_entry.place(x=10, y=145)
         
         ctk.CTkLabel(self.frame_entradas, text="Status Lote",
@@ -371,7 +404,7 @@ class TabEntradas(FunctionsEntradas, Functions):
                                            column=(
                                                'id', 'produto', 'medida', 'lote', 'estoque', 'mín', 
                                                'valor', 'fornecedor', 'nf', 'grupo', 'status',
-                                               'data', 'barcode', 'custo', 'revenda'
+                                               'data', 'barcode', 'custo', 'revenda', 'ativo'
                                            ))
         
         self.lista_produtos.heading("#0", text="")
@@ -391,6 +424,7 @@ class TabEntradas(FunctionsEntradas, Functions):
         self.lista_produtos.heading("barcode", text="")
         self.lista_produtos.heading("custo", text="")
         self.lista_produtos.heading("revenda", text="")
+        self.lista_produtos.heading("ativo", text="")
         
         self.lista_produtos.column("#0", width=0, stretch=False)
         self.lista_produtos.column("id", width=35, anchor=CENTER)
@@ -409,6 +443,7 @@ class TabEntradas(FunctionsEntradas, Functions):
         self.lista_produtos.column("barcode", width=0, stretch=False)
         self.lista_produtos.column("custo", width=0, stretch=False)
         self.lista_produtos.column("revenda", width=0, stretch=False)
+        self.lista_produtos.column("ativo", width=0, stretch=False)
         
         self.lista_produtos.place(y=88, width=970, height=180)
         
