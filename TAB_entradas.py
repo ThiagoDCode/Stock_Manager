@@ -33,6 +33,8 @@ class FunctionsEntradas(Database):
         self.barcode = self.barcode_entry.get()
     
     def clear_entries(self):
+        self.lote_on_off()
+        
         self.cod_entry.delete(0, END)
         self.data_registro.delete(0, END)
         self.produto_entry.delete(0, END)
@@ -127,7 +129,7 @@ class FunctionsEntradas(Database):
         self.clear_entries()
         self.select_database()
         
-    def lote_on_off(self, ativo):
+    def lote_on_off(self, ativo=""):
         if ativo == "off":
             self.medida_listBox.configure(state=DISABLED)
             self.fornecedor_listBox.configure(state=DISABLED)
@@ -139,7 +141,7 @@ class FunctionsEntradas(Database):
             
             self.lb_ativo.configure(text="LOTE INATIVO")
         
-        elif ativo == "on":
+        else:
             self.medida_listBox.configure(state=NORMAL)
             self.fornecedor_listBox.configure(state=NORMAL)
             self.lote_entry.configure(state=NORMAL)
@@ -147,8 +149,8 @@ class FunctionsEntradas(Database):
             self.qtd_entrada.configure(state=NORMAL)
             self.custo_entry.configure(state=NORMAL)
             self.revenda_entry.configure(state=NORMAL)
-            
-            self.lb_ativo.configure(text="LOTE ATIVO")
+
+            if ativo == "on": self.lb_ativo.configure(text="LOTE ATIVO")
 
 
 class TabEntradas(FunctionsEntradas, Functions):
