@@ -460,7 +460,7 @@ class TabEntradas(FunctionsEntradas, Functions):
     def widgets_bottom(self):
         self.frame_bottom = ctk.CTkFrame(self.root, 
                                          width=990, height=315,
-                                         border_width=1, border_color="#000")
+                                         fg_color="#363636")
         self.frame_bottom.place(y=240)
         
         ctk.CTkLabel(self.frame_bottom, text="Rastreamento de Lotes - (duplo CLICK para selecionar um produto!)",
@@ -586,4 +586,4 @@ class TabEntradas(FunctionsEntradas, Functions):
     def total_registries(self):
         total_registros = len(self.lista_produtos.get_children())
         ctk.CTkLabel(self.frame_bottom, width=200, text=f"Total de Registros: {total_registros}",
-                     font=("Cascadia Code", 15, "bold")).place(x=750, y=290)
+                     font=("Cascadia Code", 15, "bold")).place(x=750, y=288)

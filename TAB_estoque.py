@@ -238,34 +238,58 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.widgets_bottom()
     
     def buttons_header(self):
-        btn_add = ctk.CTkButton(self.root, image=self.image_button("add.png", (34, 34)), width=30, text="",
-                                compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), 
+        btn_add = ctk.CTkButton(self.root, text="",
+                                image=self.image_button("add.png", (34, 34)), 
+                                width=30,
+                                compound=LEFT, anchor=NW, 
+                                fg_color="transparent", 
+                                hover_color=("#D3D3D3", "#363636"), 
                                 command=self.register_product)
         btn_add.grid(column=0, row=0, padx=1)
         atk.tooltip(btn_add, "Cadastrar Produto")
 
-        btn_search = ctk.CTkButton(self.root, image=self.image_button("search.png", (34, 34)), width=30, text="", 
-                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), 
+        btn_search = ctk.CTkButton(self.root, text="",
+                                   image=self.image_button("search.png", (34, 34)), 
+                                   width=30, 
+                                   compound=LEFT, anchor=NW, 
+                                   fg_color="transparent", 
+                                   hover_color=("#D3D3D3", "#363636"), 
                                    command=self.search_database)
         btn_search.grid(column=1, row=0, padx=1)
         atk.tooltip(btn_search, "Buscar Registro \n (Busca por: produto/departamento/fornecedor/lote/NF)")
 
-        btn_update = ctk.CTkButton(self.root, image=self.image_button("update.png", (32, 32)), width=30, text="", 
-                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), 
+        btn_update = ctk.CTkButton(self.root, text="",
+                                   image=self.image_button("update.png", (32, 32)), 
+                                   width=30,  
+                                   compound=LEFT, anchor=NW, 
+                                   fg_color="transparent", 
+                                   hover_color=("#D3D3D3", "#363636"), 
                                    command=self.update_product)
         btn_update.grid(column=2, row=0, padx=1)
         atk.tooltip(btn_update, "Atualizar Registro")
 
-        btn_delete = ctk.CTkButton(self.root, image=self.image_button("delete.png", (28, 28)), width=30, text="", 
-                                   compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"), 
+        btn_delete = ctk.CTkButton(self.root, text="",
+                                   image=self.image_button("delete.png", (28, 28)), 
+                                   width=30,  
+                                   compound=LEFT, anchor=NW, 
+                                   fg_color="transparent", 
+                                   hover_color=("#D3D3D3", "#363636"), 
                                    command=self.delete_product)
         btn_delete.grid(column=3, row=0)
         atk.tooltip(btn_delete, "Excluir Registro")
         
-        ctk.CTkButton(self.root, width=30, text="|", font=("Arial", 25), fg_color="transparent").grid(column=4, row=0)
+        ctk.CTkButton(self.root, text="|", 
+                      width=30, 
+                      font=("Arial", 25), 
+                      fg_color="transparent"
+                      ).grid(column=4, row=0)
         
-        btn_clear = ctk.CTkButton(self.root, image=self.image_button("clear-entries.png", (30, 30)), width=30, text="",
-                                  compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"),
+        btn_clear = ctk.CTkButton(self.root, text="",
+                                  image=self.image_button("clear-entries.png", (30, 30)), 
+                                  width=30, 
+                                  compound=LEFT, anchor=NW, 
+                                  fg_color="transparent", 
+                                  hover_color=("#D3D3D3", "#363636"),
                                   command=self.clear_entries)
         btn_clear.grid(column=5, row=0)
         atk.tooltip(btn_clear, "Limpar campos de dados")
@@ -428,7 +452,8 @@ class TabEstoque(FunctionsEstoque, Functions):
         #--------------------------------------------------------------------------------------------------------------
         
         ctk.CTkLabel(self.frame_top, text="Duplo CLICK para selecionar um produto!",
-                     font=("Cascadia Code", 12, "bold")).place(x=10, y=179)
+                     font=("Cascadia Code", 12, "bold")
+                     ).place(x=10, y=179)
         
         # CÓDIGO DE BARRAS --------------------------------------------------------------------------------------------
         self.num_barcode = ctk.CTkEntry(self.frame_top, 
@@ -455,17 +480,22 @@ class TabEstoque(FunctionsEstoque, Functions):
         atk.tooltip(btn_generate_code, "Gerar Código de Barras")
 
     def widgets_bottom(self): 
-        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=308)
+        self.frame_bottom = ctk.CTkFrame(self.root, 
+                                         width=990, height=308,
+                                         fg_color="#363636")
         self.frame_bottom.place(y=245)
 
-        ctk.CTkLabel(self.frame_bottom, text="Data", font=("Cascadia Code", 15, "bold")).place(x=10, y=279)
+        ctk.CTkLabel(self.frame_bottom, text="Data", 
+                     font=("Cascadia Code", 15, "bold")
+                     ).place(x=15, y=275)
         self.data_registro = DateEntry(self.frame_bottom)
-        self.data_registro.place(x=60, y=285)
+        self.data_registro.place(x=60, y=280)
 
         # TREEVIEW ------------------------------------------------------------------------
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'data_entrada', 'produto', 'medida', 'grupo', 'fornecedor', 'lote', 'estoque', 'estoque_mín', 'nf',
-            'status', 'responsável', 'fone', 'custo', 'revenda', 'barcode', 'ativo'
+            'id', 'data_entrada', 'produto', 'medida', 'grupo', 'fornecedor', 'lote', 
+            'estoque', 'estoque_mín', 'nf', 'status', 'responsável', 'fone', 'custo', 
+            'revenda', 'barcode', 'ativo'
         ))
         self.lista_produtos.heading("#0", text="")
         self.lista_produtos.heading("id", text="Cód.")
@@ -510,8 +540,12 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.lista_produtos.place(width=970, height=255)
         # ----------------------------------------------------------------------------------
 
-        scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_produtos.yview)
-        scrollbar_x = ttk.Scrollbar(self.frame_bottom, orient="horizontal", command=self.lista_produtos.xview)
+        scrollbar_y = ttk.Scrollbar(self.frame_bottom, 
+                                    orient="vertical", 
+                                    command=self.lista_produtos.yview)
+        scrollbar_x = ttk.Scrollbar(self.frame_bottom, 
+                                    orient="horizontal", 
+                                    command=self.lista_produtos.xview)
         self.lista_produtos.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
         scrollbar_y.place(x=970, y=0, width=20, height=255)
         scrollbar_x.place(x=0, y=254, width=990, height=20)
@@ -522,5 +556,8 @@ class TabEstoque(FunctionsEstoque, Functions):
     
     def total_registries(self):
         total_registros = len(self.lista_produtos.get_children())
-        ctk.CTkLabel(self.frame_bottom, width=200, text=f"Total de Registros: {total_registros}", 
-                     font=("Cascadia Code", 15, "bold")).place(x=750, y=279)
+        ctk.CTkLabel(self.frame_bottom, 
+                     width=200, 
+                     text=f"Total de Registros: {total_registros}", 
+                     font=("Cascadia Code", 15, "bold")
+                     ).place(x=750, y=279)
