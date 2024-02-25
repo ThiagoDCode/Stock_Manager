@@ -18,7 +18,7 @@ class FunctionsResumos(Database):
     
     def filter_todos(self, resumo=False):
         query_select = """
-            SELECT id, produto, grupo, medida, estoque, valor, data, status
+            SELECT id, produto, grupo, medida, estoque, valor_estoque, data_entrada, status
             FROM estoque
         """
         data_return = Database().dql_database(query_select)
@@ -33,7 +33,7 @@ class FunctionsResumos(Database):
     
     def filter_repor(self, resumo=False):
         query_select = """
-            SELECT id, status, produto, grupo, medida, estoque, est_mín, repor, custo, total, fornecedor
+            SELECT id, status, produto, grupo, medida, estoque, estoque_mín, repor, custo, total_custo, fornecedor
             FROM estoque ORDER BY repor DESC
         """
         data_return = Database().dql_database(query_select)
@@ -50,8 +50,8 @@ class FunctionsResumos(Database):
 
     def filter_movimentos(self, resumo=False):
         query_select = """
-            SELECT id, produto, medida, estoque, valor, entradas, saídas, custo, revenda, status, data, faturamento
-            FROM estoque ORDER BY data DESC
+            SELECT id, produto, medida, estoque, valor_estoque, entradas, saídas, custo, revenda, status, data_entrada, faturamento
+            FROM estoque ORDER BY data_entrada DESC
         """
         data_return = Database().dql_database(query_select)
 
@@ -67,7 +67,7 @@ class FunctionsResumos(Database):
     
     def filter_novos(self, resumo=False):
         query_select = """
-                SELECT id, data, produto, grupo, medida, lote, entradas, estoque, fornecedor, custo, total, status
+                SELECT id, data, produto, grupo, medida, lote, entradas, estoque, fornecedor, custo, total_custo, status
                 FROM estoque ORDER BY data DESC
             """
         data_return = Database().dql_database(query_select)
@@ -106,12 +106,12 @@ class TabResumos(FunctionsResumos, Functions):
         
         self.total_repor = 0
         self.valor_repor = 0
-        self.filter_repor(resumo=True)
+        #self.filter_repor(resumo=True)
         repor = f"Repor \n{self.total_repor} produtos \nR$ {self.valor_repor:.2f}"
         
         self.total_movimentos = 0
         self.valor_faturamento = 0
-        self.filter_movimentos(resumo=True)
+        #self.filter_movimentos(resumo=True)
         excesso = f"Movimentos \n{self.total_movimentos} produtos \nR$ {self.valor_faturamento:.2f}"
         
         
@@ -217,7 +217,7 @@ class TabResumos(FunctionsResumos, Functions):
         scrollbar_y.place(x=970, y=40, width=20, height=382)
         scrollbar_x.place(x=0, y=401, width=970, height=20)
 
-        self.filter_repor()
+        #self.filter_repor()
 
     def view_movimentos(self):
         self.lista_movimentos = ttk.Treeview(self.frame_bottom, height=3, column=(
@@ -260,7 +260,7 @@ class TabResumos(FunctionsResumos, Functions):
         self.lista_movimentos.configure(yscrollcommand=scrollbar.set)
         scrollbar.place(x=970, y=40, width=20, height=382)
 
-        self.filter_movimentos()
+        #self.filter_movimentos()
 
     def view_novos(self):
         self.lista_novos = ttk.Treeview(self.frame_bottom, height=3, column=(
@@ -303,7 +303,7 @@ class TabResumos(FunctionsResumos, Functions):
         scrollbar_y.place(x=970, y=40, width=20, height=382)
         scrollbar_x.place(x=0, y=401, width=970, height=20)
         
-        self.filter_novos()
+        #self.filter_novos()
 
     def view_parados(self):
         self.lista_parados = ttk.Treeview(self.frame_bottom, height=3, column=(
@@ -339,7 +339,7 @@ class TabResumos(FunctionsResumos, Functions):
             SELECT id, produto, grupo, medida, estoque, valor, data_off, status
             FROM estoque
         """
-        self.select_database(query_select, self.lista_parados)
+        #self.select_database(query_select, self.lista_parados)
 
 
 if __name__ == "__main__":

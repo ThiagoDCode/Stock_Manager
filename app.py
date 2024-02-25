@@ -2,9 +2,10 @@ from tkinter import *
 from tkinter import ttk
 import customtkinter as ctk
 
-from TAB_resumos import *
+from TAB_resumos import TabResumos
 from TAB_estoque import TabEstoque
 from TAB_entradas import TabEntradas
+from con_database import *
 
 
 class Application:
@@ -31,11 +32,14 @@ class Application:
         edite.add_command(label="Configurações", command=WindowConfig)
     
     def tabs_application(self):
-        self.tabs_view = ctk.CTkTabview(self.root, width=1000, height=600, anchor="w", text_color=('#000', '#FFF'))
+        self.tabs_view = ctk.CTkTabview(self.root, 
+                                        width=1000, height=600, 
+                                        anchor="w", 
+                                        text_color=('#000', '#FFF'))
         self.tabs_view.pack()
 
         self.tabs_view.add("Resumos")
-        #TabResumos(self.tabs_view.tab("Resumos"))
+        TabResumos(self.tabs_view.tab("Resumos"))
 
         self.tabs_view.add("Produtos e Estoque")
         TabEstoque(self.tabs_view.tab("Produtos e Estoque"))
@@ -65,15 +69,26 @@ class WindowConfig(ctk.CTkToplevel):
         ctk.set_default_color_theme("dark-blue")
         ctk.set_appearance_mode("system")
 
-        ctk.CTkLabel(self, text="Tema", font=("Cascadia Code", 15, "bold")).place(x=50, y=50)
-        ctk.CTkOptionMenu(self, width=90, height=20, values=['System', 'Light', 'Dark'], font=("Cascadia Code", 15), 
-                          command=ctk.set_appearance_mode).place(x=50, y=100)
+        ctk.CTkLabel(self, text="Tema", 
+                     font=("Cascadia Code", 15, "bold")
+                     ).place(x=50, y=50)
+        ctk.CTkOptionMenu(self, width=90, height=20, 
+                          values=['System', 'Light', 'Dark'], 
+                          font=("Cascadia Code", 15), 
+                          command=ctk.set_appearance_mode
+                          ).place(x=50, y=100)
     
     def confirm_config(self):
-        ctk.CTkButton(self, width=75, text="APLICAR", font=("Cascadia Code", 15, "bold"),
-                      command=None).place(x=100, y=360)
-        ctk.CTkButton(self, width=75, text="CANCELAR", font=("Cascadia Code", 15, "bold"),
-                      command=self.destroy).place(x=185, y=360)
+        ctk.CTkButton(self, text="APLICAR",
+                      width=75, 
+                      font=("Cascadia Code", 15, "bold"),
+                      command=None
+                      ).place(x=100, y=360)
+        ctk.CTkButton(self, text="CANCELAR",
+                      width=75, 
+                      font=("Cascadia Code", 15, "bold"),
+                      command=self.destroy
+                      ).place(x=185, y=360)
 
 
 if __name__ == "__main__":
