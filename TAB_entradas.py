@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import customtkinter as ctk
 import awesometkinter as atk
+from tkcalendar import DateEntry
 
 from con_database import *
 from functions_base import *
@@ -12,7 +13,7 @@ class FunctionsEntradas(Database):
     
     def variables_entries(self):
         self.code = self.cod_entry.get()
-        self.data = self.data_registro.get()
+        self.data = self.data_entry.get()
         self.produto = self.produto_entry.get()
         self.lote = self.lote_entry.get()
         self.nf = self.nf_entry.get()
@@ -36,7 +37,7 @@ class FunctionsEntradas(Database):
         self.lote_on_off()
         
         self.cod_entry.delete(0, END)
-        self.data_registro.delete(0, END)
+        self.data_entry.delete(0, END)
         self.produto_entry.delete(0, END)
         self.lote_entry.delete(0, END)
         self.lb_ativo.configure(text="")
@@ -74,6 +75,8 @@ class FunctionsEntradas(Database):
         if data_return is not None:
             for dados in data_return:
                 self.lista_produtos.insert("", "end", values=dados)
+        
+        self.total_registries()
                 
     def on_doubleClick(self, event):
         self.clear_entries()
@@ -94,7 +97,7 @@ class FunctionsEntradas(Database):
             self.nf_entry.insert(END, c9)
             self.grupo_listBox.set(c10)
             self.status_entry.insert(END, c11)
-            self.data_registro.insert(END, c12)
+            self.data_entry.insert(END, c12)
             self.barcode_entry.insert(END, c13)
             self.custo_entry.insert(END, c14)
             self.revenda_entry.insert(END, c15)
@@ -116,11 +119,11 @@ class FunctionsEntradas(Database):
                 
                 query_update = """
                     UPDATE estoque SET
-                        fornecedor=?, nf=?, lote=?, medida=?, estoque=?, custo=?, revenda=?
+                        fornecedor=?, nf=?, lote=?, medida=?, estoque=?, custo=?, revenda=?, data_entrada=?
                     WHERE id=?
                 """
                 dados = [self.fornecedor, self.nf, self.lote, self.medida, 
-                         add_estoque, self.custo, self.revenda, 
+                         add_estoque, self.custo, self.revenda, self.data_entrada.get(), 
                          self.code]
                 self.dml_database(query_update, dados)
             except:
@@ -128,7 +131,71 @@ class FunctionsEntradas(Database):
         
         self.clear_entries()
         self.select_database()
+    
+    def search_database(self):
+        self.lista_produtos.delete(*self.lista_produtos.get_children())
         
+        if self.busca.get() == "" \
+            and self.busca_mes.get() == "" \
+                and self.busca_ano.get() == "" \
+                    and self.status_listBox.get() == "Status":
+            
+            self.select_database()
+        
+        else:
+            if self.busca.get():
+                self.busca.insert(END, "%")
+                busca = self.busca.get()
+                
+                query_select = f"""
+                            SELECT
+                                id, produto, medida, lote, estoque, estoque_mín,
+                                valor_estoque, fornecedor, nf, grupo, status, data_entrada,
+                                n_barcode, custo, revenda, ativo
+                            FROM
+                                estoque 
+                            WHERE 
+                                produto LIKE '%{busca}%' 
+                                OR lote LIKE '%{busca}%'
+                                OR nf LIKE '%{busca}%'
+                                ORDER BY produto ASC
+                            """
+            
+            elif self.status_listBox.get() != "Status":
+                self.status_listBox.set(self.status_listBox.get() + "%")
+                busca = self.status_listBox.get()
+                
+                query_select = f"""
+                            SELECT
+                                id, produto, medida, lote, estoque, estoque_mín,
+                                valor_estoque, fornecedor, nf, grupo, status, data_entrada,
+                                n_barcode, custo, revenda
+                            FROM
+                                estoque
+                            WHERE
+                                status LIKE '%{busca}%' ORDER BY produto ASC
+                            """
+            
+            data_return = self.dql_database(query_select)
+
+            if data_return is not None:
+                for dados in data_return:
+                    self.lista_produtos.insert("", END, values=dados)
+            
+            self.total_registries()
+        
+        self.clear_search()
+            
+    def clear_search(self):
+        self.busca.delete(0, END)
+        self.busca_mes.delete(0, END)
+        self.busca_ano.delete(0, END)
+        
+        self.busca.configure(placeholder_text="Produto, Nº Lote, Nota Fiscal")
+        self.busca_mes.configure(placeholder_text="Mês")
+        self.busca_ano.configure(placeholder_text="Ano")
+        self.status_listBox.set("Status")
+    
     def lote_on_off(self, ativo=""):
         if ativo == "off":
             self.medida_listBox.configure(state=DISABLED)
@@ -161,6 +228,7 @@ class TabEntradas(FunctionsEntradas, Functions):
         self.widgets_top()
         self.widgets_bottom()
         self.view_bottom()
+        self.total_registries()
 
     def buttons_header(self):
         btn_save = ctk.CTkButton(self.root, text="",
@@ -189,8 +257,7 @@ class TabEntradas(FunctionsEntradas, Functions):
         atk.tooltip(btn_clear, "Limpar campos de dados")
 
     def widgets_top(self):
-        self.frame_top = ctk.CTkFrame(
-            self.root, width=990, height=195, border_width=1, border_color="#000")
+        self.frame_top = ctk.CTkFrame(self.root, width=990, height=195,)
         self.frame_top.place(y=45)
 
         ctk.CTkLabel(self.frame_top, text="Código",
@@ -204,16 +271,16 @@ class TabEntradas(FunctionsEntradas, Functions):
         self.cod_entry.bind("<Key>", lambda e: self.entry_off(e))
         self.cod_entry.place(x=5, y=30)
 
-        ctk.CTkLabel(self.frame_top, text="Últ. Registro",
+        ctk.CTkLabel(self.frame_top, text="Últ. Entrada",
                      font=("Cascadia Code", 13)
                      ).place(x=70, y=5)
-        self.data_registro = ctk.CTkEntry(self.frame_top,
+        self.data_entry = ctk.CTkEntry(self.frame_top,
                                           width=105,
                                           justify=CENTER,
-                                          font=("Cascadia Code", 13, "bold"), text_color="#A9A9A9",
+                                          font=("Cascadia Code", 13), text_color="#A9A9A9",
                                           fg_color="transparent")
-        self.data_registro.bind("<Key>", lambda e: self.entry_off(e))
-        self.data_registro.place(x=70, y=30)
+        self.data_entry.bind("<Key>", lambda e: self.entry_off(e))
+        self.data_entry.place(x=70, y=30)
 
         ctk.CTkLabel(self.frame_top, text="Produto",
                      font=("Cascadia Code", 13)
@@ -400,6 +467,56 @@ class TabEntradas(FunctionsEntradas, Functions):
                      font=("Cascadia Code", 12, "bold")
                      ).place(x=10, y=1)
         
+        self.busca = ctk.CTkEntry(self.frame_bottom,
+                                  width=350,
+                                  placeholder_text="Produto, Nº Lote, Nota Fiscal",
+                                  font=("Cascadia Code", 13))
+        self.busca.place(x=10, y=50)
+        
+        self.busca_mes = ctk.CTkEntry(self.frame_bottom,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Mês",
+                                      font=("Cascadia Code", 13))
+        self.busca_mes.place(x=380, y=50)
+        ctk.CTkLabel(self.frame_bottom, text="/",
+                     font=("Cascadia Code", 20, "bold")
+                     ).place(x=435, y=50)
+        self.busca_ano = ctk.CTkEntry(self.frame_bottom,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Ano",
+                                      font=("Cascadia Code", 13))
+        self.busca_ano.place(x=450, y=50)
+        
+        lista_status = ['OK', 'BAIXO', 'CRÍTICO']
+        self.status_listBox = ctk.CTkComboBox(self.frame_bottom,
+                                                  width=100,
+                                                  values=lista_status,
+                                                  font=("Cascadia Code", 13))
+        self.status_listBox.set("Status")
+        self.status_listBox.place(x=520, y=50)
+ 
+        ctk.CTkButton(self.frame_bottom, text="BUSCAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#363636"),
+                      command=self.search_database).place(x=640, y=50)
+        
+        ctk.CTkButton(self.frame_bottom, text="LIMPAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#363636"),
+                      command=self.clear_search).place(x=710, y=50)
+        
+        ctk.CTkLabel(self.frame_bottom, text="Data", 
+                     font=("Cascadia Code", 15, "bold")
+                     ).place(x=15, y=286)
+        self.data_entrada = DateEntry(self.frame_bottom)
+        self.data_entrada.place(x=60, y=290)
+        
     def view_bottom(self):
         self.lista_produtos = ttk.Treeview(self.frame_bottom, 
                                            height=3,
@@ -465,3 +582,8 @@ class TabEntradas(FunctionsEntradas, Functions):
         self.lista_produtos.bind("<Double-1>", self.on_doubleClick)
         
         self.select_database()
+        
+    def total_registries(self):
+        total_registros = len(self.lista_produtos.get_children())
+        ctk.CTkLabel(self.frame_bottom, width=200, text=f"Total de Registros: {total_registros}",
+                     font=("Cascadia Code", 15, "bold")).place(x=750, y=290)

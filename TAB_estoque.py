@@ -179,8 +179,11 @@ class FunctionsEstoque(Database):
     def search_database(self):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
 
-        if self.produto_entry.get() == "" and self.grupo_listBox.get() == "" and self.lote_entry.get() == "" \
-            and self.fornecedor_listBox.get() == "" and self.nf_entry.get() == "":
+        if self.produto_entry.get() == "" \
+            and self.grupo_listBox.get() == "" \
+                and self.lote_entry.get() == "" \
+                    and self.fornecedor_listBox.get() == "" \
+                        and self.nf_entry.get() == "":
             
             self.select_database()
         else:
