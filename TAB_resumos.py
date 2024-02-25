@@ -38,14 +38,12 @@ class FunctionsResumos(Database):
         """
         data_return = Database().dql_database(query_select)
         
-        if resumo:
-            for dados in data_return:
-                if dados[7] > 0:
+        for dados in data_return:
+            if dados[7] > 0:
+                if resumo:
                     self.total_repor += 1
                     self.valor_repor += dados[9]
-        else:
-            for dados in data_return:
-                if dados[7] > 0:
+                else:
                     self.lista_repor.insert("", END, values=dados)
 
     def filter_movimentos(self, resumo=False):
@@ -67,21 +65,43 @@ class FunctionsResumos(Database):
     
     def filter_novos(self, resumo=False):
         query_select = """
-                SELECT id, data, produto, grupo, medida, lote, entradas, estoque, fornecedor, custo, total_custo, status
-                FROM estoque ORDER BY data DESC
+                SELECT id, data_entrada, produto, medida, lote, entradas, custo, custo_total, estoque, status, grupo, fornecedor
+                FROM estoque ORDER BY data_entrada DESC
             """
         data_return = Database().dql_database(query_select)
-
-        if resumo:
-            for dados in data_return:
-                pass
-        else:
-            for dados in data_return:
-                ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
-                data = date.today() - date(ano, mes, dia)
-                
-                if data.days <= 30:
+        
+        for dados in data_return:
+            # Busca entradas feitas dentro dos últimos 30 dias
+            ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
+            data = date.today() - date(ano, mes, dia)
+            
+            if data.days <= 30:
+                if resumo:
+                    self.total_novos += 1
+                    self.valor_novos += dados[7]
+                else:
                     self.lista_novos.insert("", END, values=dados)
+    
+    def filter_parados(self, resumo=False):
+        sql = """
+            SELECT 
+                id, data_saída, produto, lote, medida, saídas, 
+                estoque, valor_estoque, grupo, fornecedor
+            FROM 
+                estoque ORDER BY data_saída DESC
+        """
+        data_return = Database().dql_database(sql)
+        
+        for dados in data_return:
+            ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
+            data = date.today() - date(ano, mes, dia)
+            
+            if data.days >= 90:
+                if resumo:
+                    self.total_parados += 1
+                    self.valor_parados += dados[7]
+                else:
+                    self.lista_parados.insert("", END, values=dados)
 
 
 class TabResumos(FunctionsResumos, Functions):
@@ -107,24 +127,29 @@ class TabResumos(FunctionsResumos, Functions):
         
         self.total_repor = 0
         self.valor_repor = 0
-        #self.filter_repor(resumo=True)
-        repor = f"Repor \n{self.total_repor} produtos \nR$ {self.valor_repor:.2f}"
+        self.filter_repor(resumo=True)
+        repor = f"REPOR \n{self.total_repor} produtos \nR$ {self.valor_repor:.2f}"
         
         self.total_movimentos = 0
         self.valor_faturamento = 0
         #self.filter_movimentos(resumo=True)
-        excesso = f"Movimentos \n{self.total_movimentos} produtos \nR$ {self.valor_faturamento:.2f}"
+        faturamento = f"FATURAMENTO \n{self.total_movimentos} produtos \nR$ {self.valor_faturamento:.2f}"
         
+        self.total_novos = 0
+        self.valor_novos = 0
+        self.filter_novos(resumo=True)
+        novos = f"NOVOS \n{self.total_novos} produtos \nR$ {self.valor_novos:.2f}"
         
-        
-        novos = f"Novos \n{2} produtos \nR$ {297.10}"
-        parados = f"Parados há 90 dias \n{5} produtos \nR$ {398.56}"
+        self.total_parados = 0
+        self.valor_parados = 0
+        self.filter_parados(resumo=True)
+        parados = f"PARADOS \n{self.total_parados} produtos \nR$ {self.valor_parados:.2f}"
         
         ctk.CTkButton(self.frame_top, width=175, text=todos, font=("Cascadia Code", 15), 
                       command=self.views_todos).grid(column=0, row=0)
         ctk.CTkButton(self.frame_top, width=175, text=repor, font=("Cascadia Code", 15), 
                       command=self.view_repor).grid(column=1, row=0, padx=10)
-        ctk.CTkButton(self.frame_top, width=175, text=excesso, font=("Cascadia Code", 15),
+        ctk.CTkButton(self.frame_top, width=175, text=faturamento, font=("Cascadia Code", 15),
                       command=self.view_movimentos).grid(column=2, row=0)
         ctk.CTkButton(self.frame_top, width=175, text=novos, font=("Cascadia Code", 15),
                       command=self.view_novos).grid(column=3, row=0, padx=10)
@@ -152,7 +177,7 @@ class TabResumos(FunctionsResumos, Functions):
             'id', 'produto', 'grupo', 'medida', 'estoque', 'valor', 'data', 'status'
         ))
         self.lista_todos.heading("#0", text="")
-        self.lista_todos.heading("id", text="Cod.")
+        self.lista_todos.heading("id", text="Cód.")
         self.lista_todos.heading("produto", text="Produto")
         self.lista_todos.heading("grupo", text="Departamento")
         self.lista_todos.heading("medida", text="Medida")
@@ -185,25 +210,25 @@ class TabResumos(FunctionsResumos, Functions):
             'custo', 'total', 'fornecedor'
         ))
         self.lista_repor.heading("#0", text="")
-        self.lista_repor.heading("id", text="Registro")
-        self.lista_repor.heading("status", text="Status Estoque")
+        self.lista_repor.heading("id", text="Cód.")
+        self.lista_repor.heading("status", text="Status")
         self.lista_repor.heading("produto", text="Produto")
         self.lista_repor.heading("grupo", text="Departamento")
         self.lista_repor.heading("medida", text="Medida")
         self.lista_repor.heading("estoque", text="Estoque")
         self.lista_repor.heading("mín", text="Est.Mín")
         self.lista_repor.heading("repor", text="Repor")
-        self.lista_repor.heading("custo", text="Custo Médio")
+        self.lista_repor.heading("custo", text="Custo Unit.")
         self.lista_repor.heading("total", text="Custo Total")
         self.lista_repor.heading("fornecedor", text="Fornecedor")
         
         self.lista_repor.column("#0", width=0, stretch=False)
-        self.lista_repor.column("id", width=50, anchor=CENTER)
-        self.lista_repor.column("status", width=90, anchor=CENTER)
+        self.lista_repor.column("id", width=35, anchor=CENTER)
+        self.lista_repor.column("status", width=70, anchor=CENTER)
         self.lista_repor.column("produto", width=270)
-        self.lista_repor.column("grupo", width=150)
+        self.lista_repor.column("grupo", width=125)
         self.lista_repor.column("medida", width=85, anchor=CENTER)
-        self.lista_repor.column("estoque", width=60, anchor=CENTER)
+        self.lista_repor.column("estoque", width=50, anchor=CENTER)
         self.lista_repor.column("mín", width=50, anchor=CENTER)
         self.lista_repor.column("repor", width=50, anchor=CENTER)
         self.lista_repor.column("custo", width=80, anchor=CENTER)
@@ -218,7 +243,7 @@ class TabResumos(FunctionsResumos, Functions):
         scrollbar_y.place(x=970, y=40, width=20, height=382)
         scrollbar_x.place(x=0, y=401, width=970, height=20)
 
-        #self.filter_repor()
+        self.filter_repor()
 
     def view_movimentos(self):
         self.lista_movimentos = ttk.Treeview(self.frame_bottom, height=3, column=(
@@ -265,86 +290,94 @@ class TabResumos(FunctionsResumos, Functions):
 
     def view_novos(self):
         self.lista_novos = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'data', 'produto', 'grupo', 'medida', 'lote', 'entradas', 'estoque', 'fornecedor',
-            'custo', 'total', 'status'
+            'id', 'data', 'produto', 'medida', 'lote', 'entrada', 'custo', 
+            'total', 'estoque', 'status', 'grupo', 'fornecedor'
         ))
         self.lista_novos.heading("#0", text="")
-        self.lista_novos.heading("id", text="Registro")
-        self.lista_novos.heading("data", text="Data")
+        self.lista_novos.heading("id", text="Cód.")
+        self.lista_novos.heading("data", text="Últ. Entrada")
         self.lista_novos.heading("produto", text="Produto")
-        self.lista_novos.heading("grupo", text="Departamento")
         self.lista_novos.heading("medida", text="Medida")
         self.lista_novos.heading("lote", text="Nº Lote")
-        self.lista_novos.heading("entradas", text="Entradas")
-        self.lista_novos.heading("estoque", text="Estoque")
-        self.lista_novos.heading("fornecedor", text="Fornecedor")
-        self.lista_novos.heading("custo", text="Custo Médio")
+        self.lista_novos.heading("entrada", text="Entrada")
+        self.lista_novos.heading("custo", text="Custo Unit.")
         self.lista_novos.heading("total", text="Custo Total")
+        self.lista_novos.heading("estoque", text="Estoque")
         self.lista_novos.heading("status", text="Status")
+        self.lista_novos.heading("grupo", text="Departamento")
+        self.lista_novos.heading("fornecedor", text="Fornecedor")
+        
         
         self.lista_novos.column("#0", width=0, stretch=False)
-        self.lista_novos.column("id", width=50)
-        self.lista_novos.column("data", width=85)
+        self.lista_novos.column("id", width=35, anchor=CENTER)
+        self.lista_novos.column("data", width=75, anchor=CENTER)
         self.lista_novos.column("produto", width=270)
-        self.lista_novos.column("grupo", width=150)
-        self.lista_novos.column("medida", width=85)
-        self.lista_novos.column("lote", width=85)
-        self.lista_novos.column("entradas", width=55)
-        self.lista_novos.column("estoque", width=60)
+        self.lista_novos.column("medida", width=85, anchor=CENTER)
+        self.lista_novos.column("lote", width=60, anchor=CENTER)
+        self.lista_novos.column("entrada", width=50, anchor=CENTER)
+        self.lista_novos.column("custo", width=80, anchor=CENTER)
+        self.lista_novos.column("total", width=80, anchor=CENTER)
+        self.lista_novos.column("estoque", width=50, anchor=CENTER)
+        self.lista_novos.column("status", width=70, anchor=CENTER)
+        self.lista_novos.column("grupo", width=125)
         self.lista_novos.column("fornecedor", width=150)
-        self.lista_novos.column("custo", width=80)
-        self.lista_novos.column("total", width=80)
-        self.lista_novos.column("status", width=90)
         
         self.lista_novos.place(y=40, width=970, height=362)
         
-        scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_novos.yview)
-        scrollbar_x = ttk.Scrollbar(self.frame_bottom, orient="horizontal", command=self.lista_novos.xview)
+        scrollbar_y = ttk.Scrollbar(self.frame_bottom, 
+                                    orient="vertical", 
+                                    command=self.lista_novos.yview)
+        scrollbar_x = ttk.Scrollbar(self.frame_bottom, 
+                                    orient="horizontal", 
+                                    command=self.lista_novos.xview)
         self.lista_novos.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
         scrollbar_y.place(x=970, y=40, width=20, height=382)
         scrollbar_x.place(x=0, y=401, width=970, height=20)
         
-        #self.filter_novos()
+        self.filter_novos()
 
     def view_parados(self):
         self.lista_parados = ttk.Treeview(self.frame_bottom, height=3, column=(
-            'id', 'produto', 'grupo', 'medida', 'estoque', 'valor', 'data', 'status'
+            'id', 'data', 'produto', 'lote', 'medida', 'saída', 
+            'estoque', 'valor', 'grupo', 'fornecedor'
         ))
         self.lista_parados.heading("#0", text="")
-        self.lista_parados.heading("id", text="Registro")
+        self.lista_parados.heading("id", text="Cód.")
+        self.lista_parados.heading("data", text="Últ. Saída")
         self.lista_parados.heading("produto", text="Produto")
-        self.lista_parados.heading("grupo", text="Departamento")
+        self.lista_parados.heading("lote", text="Nº Lote")
         self.lista_parados.heading("medida", text="Medida")
+        self.lista_parados.heading("saída", text="Saída")
         self.lista_parados.heading("estoque", text="Estoque")
         self.lista_parados.heading("valor", text="Valor Estoque")
-        self.lista_parados.heading("data", text="Última Saída")
-        self.lista_parados.heading("status", text="Status")
+        self.lista_parados.heading("grupo", text="Departamento")
+        self.lista_parados.heading("fornecedor", text="Fornecedor")
         
         self.lista_parados.column("#0", width=0, stretch=False)
-        self.lista_parados.column("id", width=50)
+        self.lista_parados.column("id", width=35, anchor=CENTER)
+        self.lista_parados.column("data", width=75, anchor=CENTER)
         self.lista_parados.column("produto", width=270)
-        self.lista_parados.column("grupo", width=150)
-        self.lista_parados.column("medida", width=85)
-        self.lista_parados.column("estoque", width=60)
-        self.lista_parados.column("valor", width=80)
-        self.lista_parados.column("data", width=75)
-        self.lista_parados.column("status", width=85)
+        self.lista_parados.column("lote", width=60, anchor=CENTER)
+        self.lista_parados.column("medida", width=85, anchor=CENTER)
+        self.lista_parados.column("saída", width=50, anchor=CENTER)
+        self.lista_parados.column("estoque", width=50, anchor=CENTER)
+        self.lista_parados.column("valor", width=80, anchor=CENTER)
+        self.lista_parados.column("grupo", width=125)
+        self.lista_parados.column("fornecedor", width=150)
         
         self.lista_parados.place(y=40, width=970, height=382)
         
-        scrollbar = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_parados.yview)
-        self.lista_parados.configure(yscrollcommand=scrollbar.set)
-        scrollbar.place(x=970, y=40, width=20, height=382)
+        scrollbar_y = ttk.Scrollbar(self.frame_bottom, 
+                                    orient="vertical", 
+                                    command=self.lista_parados.yview)
+        scrollbar_x = ttk.Scrollbar(self.frame_bottom, 
+                                    orient="horizontal", 
+                                    command=self.lista_parados.xview)
+        self.lista_parados.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+        scrollbar_y.place(x=970, y=40, width=20, height=382)
+        scrollbar_x.place(x=0, y=401, width=970, height=20)
         
-        query_select = """
-            SELECT id, produto, grupo, medida, estoque, valor, data_off, status
-            FROM estoque
-        """
-        #self.select_database(query_select, self.lista_parados)
-        
-    def total_registries(self):
-        self.total_registros = len(self.lista_produtos.get_children())
-
+        self.filter_parados()
 
 
 if __name__ == "__main__":
