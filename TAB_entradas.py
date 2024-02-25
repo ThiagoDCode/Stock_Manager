@@ -585,5 +585,6 @@ class TabEntradas(FunctionsEntradas, Functions):
         
     def total_registries(self):
         total_registros = len(self.lista_produtos.get_children())
-        ctk.CTkLabel(self.frame_bottom, width=200, text=f"Total de Registros: {total_registros}",
+        ctk.CTkLabel(self.frame_bottom, text=f"Total de Registros: {total_registros}",
+                     width=200,
                      font=("Cascadia Code", 15, "bold")).place(x=750, y=288)

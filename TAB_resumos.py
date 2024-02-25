@@ -24,8 +24,8 @@ class FunctionsResumos(Database):
         data_return = Database().dql_database(query_select)
 
         if resumo:
+            self.total_itens = len(data_return)
             for dados in data_return:
-                self.total_itens += 1
                 self.valor_itens += dados[5]
         else:
             for dados in data_return:
@@ -94,7 +94,8 @@ class TabResumos(FunctionsResumos, Functions):
         
     def widgets_top(self):
         ctk.CTkLabel(self.root, text="Análise de Estoque", 
-                     font=("Constantia", 25), text_color=("#1C1C1C", "#D3D3D3")).place(x=20, y=10)
+                     font=("Constantia", 25), text_color=("#1C1C1C", "#D3D3D3")
+                     ).place(x=20, y=10)
         
         self.frame_top = ctk.CTkFrame(self.root, width=985, height=75, border_width=1, border_color="#000")
         self.frame_top.place(x=1, y=50)
@@ -102,7 +103,7 @@ class TabResumos(FunctionsResumos, Functions):
         self.total_itens = 0
         self.valor_itens = 0
         self.filter_todos(resumo=True)
-        todos = f"Todos \n{self.total_itens} produtos \nR$ {self.valor_itens:.2f}"
+        todos = f"TODOS \n{self.total_itens} produtos \nR$ {self.valor_itens:.2f}"
         
         self.total_repor = 0
         self.valor_repor = 0
@@ -340,6 +341,10 @@ class TabResumos(FunctionsResumos, Functions):
             FROM estoque
         """
         #self.select_database(query_select, self.lista_parados)
+        
+    def total_registries(self):
+        self.total_registros = len(self.lista_produtos.get_children())
+
 
 
 if __name__ == "__main__":
