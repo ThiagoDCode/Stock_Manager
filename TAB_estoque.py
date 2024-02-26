@@ -238,64 +238,73 @@ class TabEstoque(FunctionsEstoque, Functions):
         self.widgets_bottom()
     
     def buttons_header(self):
-        btn_add = ctk.CTkButton(self.root, text="",
-                                image=self.image_button("add.png", (34, 34)), 
+        self.frame_buttons = ctk.CTkFrame(self.root, 
+                                          width=990, height=40,
+                                          fg_color="#363636")
+        self.frame_buttons.place(x=1, y=1)
+        
+        btn_add = ctk.CTkButton(self.frame_buttons, text="",
                                 width=30,
+                                corner_radius=3,
+                                image=self.image_button("add.png", (26, 26)), 
                                 compound=LEFT, anchor=NW, 
                                 fg_color="transparent", 
-                                hover_color=("#D3D3D3", "#363636"), 
+                                hover_color=("#D3D3D3", "#4F4F4F"),
                                 command=self.register_product)
-        btn_add.grid(column=0, row=0, padx=1)
+        btn_add.place(x=2, y=2)
         atk.tooltip(btn_add, "Cadastrar Produto")
 
-        btn_search = ctk.CTkButton(self.root, text="",
-                                   image=self.image_button("search.png", (34, 34)), 
-                                   width=30, 
+        btn_search = ctk.CTkButton(self.frame_buttons, text="",
+                                   width=30,
+                                   corner_radius=3,
+                                   image=self.image_button("search.png", (26, 26)), 
                                    compound=LEFT, anchor=NW, 
                                    fg_color="transparent", 
-                                   hover_color=("#D3D3D3", "#363636"), 
+                                   hover_color=("#D3D3D3", "#4F4F4F"),
                                    command=self.search_database)
-        btn_search.grid(column=1, row=0, padx=1)
+        btn_search.place(x=42, y=2)
         atk.tooltip(btn_search, "Buscar Registro \n (Busca por: produto/departamento/fornecedor/lote/NF)")
 
-        btn_update = ctk.CTkButton(self.root, text="",
-                                   image=self.image_button("update.png", (32, 32)), 
-                                   width=30,  
+        btn_update = ctk.CTkButton(self.frame_buttons, text="",
+                                   width=30,
+                                   corner_radius=3,
+                                   image=self.image_button("update.png", (26, 26)), 
                                    compound=LEFT, anchor=NW, 
                                    fg_color="transparent", 
-                                   hover_color=("#D3D3D3", "#363636"), 
+                                   hover_color=("#D3D3D3", "#4F4F4F"),
                                    command=self.update_product)
-        btn_update.grid(column=2, row=0, padx=1)
+        btn_update.place(x=82, y=2)
         atk.tooltip(btn_update, "Atualizar Registro")
 
-        btn_delete = ctk.CTkButton(self.root, text="",
-                                   image=self.image_button("delete.png", (28, 28)), 
-                                   width=30,  
+        btn_delete = ctk.CTkButton(self.frame_buttons, text="",
+                                   width=30,
+                                   corner_radius=3, 
+                                   image=self.image_button("delete.png", (26, 26)), 
                                    compound=LEFT, anchor=NW, 
                                    fg_color="transparent", 
-                                   hover_color=("#D3D3D3", "#363636"), 
+                                   hover_color=("#D3D3D3", "#4F4F4F"),
                                    command=self.delete_product)
-        btn_delete.grid(column=3, row=0)
+        btn_delete.place(x=122, y=2)
         atk.tooltip(btn_delete, "Excluir Registro")
         
-        ctk.CTkButton(self.root, text="|", 
-                      width=30, 
-                      font=("Arial", 25), 
-                      fg_color="transparent"
-                      ).grid(column=4, row=0)
+        ctk.CTkLabel(self.frame_buttons, text="||",
+                     font=("Arial", 30), text_color="#696969",
+                     fg_color="transparent").place(x=162)
         
-        btn_clear = ctk.CTkButton(self.root, text="",
-                                  image=self.image_button("clear-entries.png", (30, 30)), 
-                                  width=30, 
+        btn_clear = ctk.CTkButton(self.frame_buttons, text="",
+                                  width=30,
+                                  corner_radius=3,
+                                  image=self.image_button("clear-entries.png", (26, 26)), 
                                   compound=LEFT, anchor=NW, 
                                   fg_color="transparent", 
-                                  hover_color=("#D3D3D3", "#363636"),
+                                  hover_color=("#D3D3D3", "#4F4F4F"),
                                   command=self.clear_entries)
-        btn_clear.grid(column=5, row=0)
+        btn_clear.place(x=180, y=2)
         atk.tooltip(btn_clear, "Limpar campos de dados")
 
     def widgets_top(self):  
-        self.frame_top = ctk.CTkFrame(self.root, width=990, height=200)
+        self.frame_top = ctk.CTkFrame(self.root, 
+                                      width=990, height=200)
         self.frame_top.place(y=40)
 
         ctk.CTkLabel(self.frame_top, text="Código", 

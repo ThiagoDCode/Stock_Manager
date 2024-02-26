@@ -231,33 +231,40 @@ class TabEntradas(FunctionsEntradas, Functions):
         self.total_registries()
 
     def buttons_header(self):
-        btn_save = ctk.CTkButton(self.root, text="",
-                                 image=self.image_button("save.png", (35, 35)),
-                                 width=30, 
+        self.frame_buttons = ctk.CTkFrame(self.root,
+                                          width=990, height=40,
+                                          fg_color="#363636")
+        self.frame_buttons.place(x=1, y=1)
+        
+        btn_save = ctk.CTkButton(self.frame_buttons, text="",
+                                 width=30,
+                                 corner_radius=3,
+                                 image=self.image_button("save.png", (26, 26)),
                                  compound=LEFT, anchor=NW, 
                                  fg_color="transparent",
-                                 hover_color=("#D3D3D3", "#363636"), 
+                                 hover_color=("#D3D3D3", "#4F4F4F"),
                                  command=self.save_register)
-        btn_save.grid(column=0, row=0)
+        btn_save.place(x=3, y=3)
         atk.tooltip(btn_save, "Salvar Registro")
         
-        ctk.CTkButton(self.root, width=30, text="|", 
-                      font=("Arial", 25), 
-                      fg_color="transparent"
-                      ).grid(column=1, row=0)
+        ctk.CTkLabel(self.frame_buttons, text="||",
+                     font=("Arial", 30), text_color="#696969",
+                     fg_color="transparent").place(x=40)
         
-        btn_clear = ctk.CTkButton(self.root, text="",
-                                  image=self.image_button("clear-entries.png", (35, 35)), 
+        btn_clear = ctk.CTkButton(self.frame_buttons, text="",
                                   width=30,
+                                  corner_radius=3,
+                                  image=self.image_button("clear-entries.png", (26, 26)), 
                                   compound=LEFT, anchor=NW, 
                                   fg_color="transparent", 
-                                  hover_color=("#D3D3D3", "#363636"),
+                                  hover_color=("#D3D3D3", "#4F4F4F"),
                                   command=self.clear_entries)
-        btn_clear.grid(column=2, row=0)
+        btn_clear.place(x=57, y=3)
         atk.tooltip(btn_clear, "Limpar campos de dados")
 
     def widgets_top(self):
-        self.frame_top = ctk.CTkFrame(self.root, width=990, height=195,)
+        self.frame_top = ctk.CTkFrame(self.root, 
+                                      width=990, height=195,)
         self.frame_top.place(y=45)
 
         ctk.CTkLabel(self.frame_top, text="Código",
@@ -501,14 +508,14 @@ class TabEntradas(FunctionsEntradas, Functions):
                       width=60,
                       font=("Cascadia Code", 13, "bold"),
                       fg_color="#696969",
-                      hover_color=("#D3D3D3", "#363636"),
+                      hover_color=("#D3D3D3", "#1C1C1C"),
                       command=self.search_database).place(x=640, y=50)
         
         ctk.CTkButton(self.frame_bottom, text="LIMPAR",
                       width=60,
                       font=("Cascadia Code", 13, "bold"),
                       fg_color="#696969",
-                      hover_color=("#D3D3D3", "#363636"),
+                      hover_color=("#D3D3D3", "#1C1C1C"),
                       command=self.clear_search).place(x=710, y=50)
         
         ctk.CTkLabel(self.frame_bottom, text="Data", 
@@ -518,12 +525,10 @@ class TabEntradas(FunctionsEntradas, Functions):
         self.data_entrada.place(x=60, y=290)
         
     def view_bottom(self):
-        self.lista_produtos = ttk.Treeview(self.frame_bottom, 
-                                           height=3,
-                                           column=(
-                                               'id', 'produto', 'medida', 'lote', 'estoque', 'mín', 
-                                               'valor', 'fornecedor', 'nf', 'grupo', 'status',
-                                               'data', 'barcode', 'custo', 'revenda', 'ativo'
+        self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
+                                            'id', 'produto', 'medida', 'lote', 'estoque', 'mín', 
+                                            'valor', 'fornecedor', 'nf', 'grupo', 'status',
+                                            'data', 'barcode', 'custo', 'revenda', 'ativo'
                                            ))
         
         self.lista_produtos.heading("#0", text="")
@@ -585,5 +590,6 @@ class TabEntradas(FunctionsEntradas, Functions):
         
     def total_registries(self):
         total_registros = len(self.lista_produtos.get_children())
-        ctk.CTkLabel(self.frame_bottom, width=200, text=f"Total de Registros: {total_registros}",
+        ctk.CTkLabel(self.frame_bottom, text=f"Total de Registros: {total_registros}",
+                     width=200,
                      font=("Cascadia Code", 15, "bold")).place(x=750, y=288)
