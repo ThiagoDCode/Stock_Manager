@@ -47,7 +47,7 @@ class Application:
         self.tabs_view.add("Entradas")
         TabEntradas(self.tabs_view.tab("Entradas"))
 
-        self.tabs_view.set("Resumos",)
+        self.tabs_view.set("Entradas",)
 
 
 class WindowConfig(ctk.CTkToplevel):
