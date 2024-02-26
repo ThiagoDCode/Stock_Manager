@@ -93,6 +93,7 @@ class FunctionsResumos(Database):
         data_return = Database().dql_database(sql)
         
         for dados in data_return:
+            # Busca por saídas feitas a mais de 90 dias
             ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
             data = date.today() - date(ano, mes, dia)
             
@@ -109,7 +110,7 @@ class TabResumos(FunctionsResumos, Functions):
         self.root = root
         
         self.widgets_top()
-        self.widgets_bottom()
+        #self.widgets_bottom()
         self.views_todos()
         
     def widgets_top(self):
@@ -117,7 +118,7 @@ class TabResumos(FunctionsResumos, Functions):
                      font=("Constantia", 25), text_color=("#1C1C1C", "#D3D3D3")
                      ).place(x=20, y=10)
         
-        self.frame_top = ctk.CTkFrame(self.root, width=985, height=75, border_width=1, border_color="#000")
+        self.frame_top = ctk.CTkFrame(self.root, width=985, height=75)
         self.frame_top.place(x=1, y=50)
         
         self.total_itens = 0
@@ -161,19 +162,29 @@ class TabResumos(FunctionsResumos, Functions):
                       command=self.widgets_top).grid(column=5, row=0, padx=10)
         
     def widgets_bottom(self):
-        self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=425, border_width=1, border_color="#000")
-        self.frame_bottom.place(x=0, y=125)
+        pass
+        #self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=425, border_width=1, border_color="#000")
+        #self.frame_bottom.place(x=0, y=125)
         
-        ctk.CTkLabel(self.frame_bottom, text="Produto", font=("Cascadia Code", 13)).place(x=5, y=5)
-        self.produto_search = ctk.CTkEntry(self.frame_bottom, width=250, font=("Cascadia Code", 13))
-        self.produto_search.place(x=65, y=5)
+        #ctk.CTkLabel(self.frame_bottom, text="Produto", font=("Cascadia Code", 13)).place(x=5, y=5)
+        #self.produto_search = ctk.CTkEntry(self.frame_bottom, width=250, font=("Cascadia Code", 13))
+        #self.produto_search.place(x=65, y=5)
         
-        ctk.CTkLabel(self.frame_bottom, text="Status", font=("Cascadia Code", 13)).place(x=325, y=5)
-        self.status_search = ctk.CTkEntry(self.frame_bottom, width=125, font=("Cascadia Code", 13))
-        self.status_search.place(x=378, y=5)
+        #ctk.CTkLabel(self.frame_bottom, text="Status", font=("Cascadia Code", 13)).place(x=325, y=5)
+        #self.status_search = ctk.CTkEntry(self.frame_bottom, width=125, font=("Cascadia Code", 13))
+        #self.status_search.place(x=378, y=5)
         
     def views_todos(self):
-        self.lista_todos = ttk.Treeview(self.frame_bottom, height=3, column=(
+        self.frame_todos = ctk.CTkFrame(self.root, 
+                                        width=990, height=425, 
+                                        fg_color="#363636")
+        self.frame_todos.place(x=0, y=125)
+        
+        ctk.CTkLabel(self.frame_todos, text="Rastreamento de todos os produtos registrados!",
+                     font=("Cascadia Code", 13), text_color="#D3D3D3"
+                     ).place(x=5, y=5)
+        
+        self.lista_todos = ttk.Treeview(self.frame_todos, height=3, column=(
             'id', 'produto', 'grupo', 'medida', 'estoque', 'valor', 'data', 'status'
         ))
         self.lista_todos.heading("#0", text="")
@@ -198,14 +209,23 @@ class TabResumos(FunctionsResumos, Functions):
         
         self.lista_todos.place(y=40, width=970, height=382)
         
-        scrollbar = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_todos.yview)
+        scrollbar = ttk.Scrollbar(self.frame_todos, orient="vertical", command=self.lista_todos.yview)
         self.lista_todos.configure(yscrollcommand=scrollbar.set)
         scrollbar.place(x=970, y=40, width=20, height=382)
 
         self.filter_todos()
         
     def view_repor(self):
-        self.lista_repor = ttk.Treeview(self.frame_bottom, height=3, column=(
+        self.frame_repor = ctk.CTkFrame(self.root,
+                                        width=990, height=425,
+                                        fg_color="#363636")
+        self.frame_repor.place(x=0, y=125)
+
+        ctk.CTkLabel(self.frame_repor, text="Recomendações de produtos para reposição de estoque!",
+                     font=("Cascadia Code", 13), text_color="#D3D3D3"
+                     ).place(x=5, y=5)
+        
+        self.lista_repor = ttk.Treeview(self.frame_repor, height=3, column=(
             'id', 'status', 'produto', 'grupo', 'medida', 'estoque', 'mín', 'repor', 
             'custo', 'total', 'fornecedor'
         ))
@@ -237,8 +257,12 @@ class TabResumos(FunctionsResumos, Functions):
         
         self.lista_repor.place(y=40, width=970, height=362)
         
-        scrollbar_y = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_repor.yview)
-        scrollbar_x = ttk.Scrollbar(self.frame_bottom, orient="horizontal", command=self.lista_repor.xview)
+        scrollbar_y = ttk.Scrollbar(self.frame_repor, 
+                                    orient="vertical", 
+                                    command=self.lista_repor.yview)
+        scrollbar_x = ttk.Scrollbar(self.frame_repor, 
+                                    orient="horizontal", 
+                                    command=self.lista_repor.xview)
         self.lista_repor.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
         scrollbar_y.place(x=970, y=40, width=20, height=382)
         scrollbar_x.place(x=0, y=401, width=970, height=20)
@@ -246,7 +270,16 @@ class TabResumos(FunctionsResumos, Functions):
         self.filter_repor()
 
     def view_movimentos(self):
-        self.lista_movimentos = ttk.Treeview(self.frame_bottom, height=3, column=(
+        self.frame_movimentos = ctk.CTkFrame(self.root, 
+                                             width=990, height=425, 
+                                             fg_color="#363636")
+        self.frame_movimentos.place(x=0, y=125)
+
+        ctk.CTkLabel(self.frame_movimentos, text="...",
+                     font=("Cascadia Code", 13), text_color="#D3D3D3"
+                     ).place(x=5, y=5)
+        
+        self.lista_movimentos = ttk.Treeview(self.frame_movimentos, height=3, column=(
             'id', 'produto', 'medida', 'estoque', 'valor', 'entradas', 'saídas', 'custo',
             'revenda', 'status', 'data', 'faturamento'
         ))
@@ -282,14 +315,25 @@ class TabResumos(FunctionsResumos, Functions):
         
         self.lista_movimentos.place(y=40, width=970, height=382)
         
-        scrollbar = ttk.Scrollbar(self.frame_bottom, orient="vertical", command=self.lista_movimentos.yview)
+        scrollbar = ttk.Scrollbar(self.frame_movimentos, 
+                                  orient="vertical", 
+                                  command=self.lista_movimentos.yview)
         self.lista_movimentos.configure(yscrollcommand=scrollbar.set)
         scrollbar.place(x=970, y=40, width=20, height=382)
 
         #self.filter_movimentos()
 
     def view_novos(self):
-        self.lista_novos = ttk.Treeview(self.frame_bottom, height=3, column=(
+        self.frame_novos = ctk.CTkFrame(self.root,
+                                        width=990, height=425,
+                                        fg_color="#363636")
+        self.frame_novos.place(x=0, y=125)
+
+        ctk.CTkLabel(self.frame_novos, text="Registros e entradas feitas nos últimos 30 dias!",
+                     font=("Cascadia Code", 13), text_color="#D3D3D3"
+                     ).place(x=5, y=5)
+        
+        self.lista_novos = ttk.Treeview(self.frame_novos, height=3, column=(
             'id', 'data', 'produto', 'medida', 'lote', 'entrada', 'custo', 
             'total', 'estoque', 'status', 'grupo', 'fornecedor'
         ))
@@ -324,10 +368,10 @@ class TabResumos(FunctionsResumos, Functions):
         
         self.lista_novos.place(y=40, width=970, height=362)
         
-        scrollbar_y = ttk.Scrollbar(self.frame_bottom, 
+        scrollbar_y = ttk.Scrollbar(self.frame_novos, 
                                     orient="vertical", 
                                     command=self.lista_novos.yview)
-        scrollbar_x = ttk.Scrollbar(self.frame_bottom, 
+        scrollbar_x = ttk.Scrollbar(self.frame_novos, 
                                     orient="horizontal", 
                                     command=self.lista_novos.xview)
         self.lista_novos.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
@@ -337,7 +381,16 @@ class TabResumos(FunctionsResumos, Functions):
         self.filter_novos()
 
     def view_parados(self):
-        self.lista_parados = ttk.Treeview(self.frame_bottom, height=3, column=(
+        self.frame_parados = ctk.CTkFrame(self.root, 
+                                          width=990, height=425, 
+                                          fg_color="#363636")
+        self.frame_parados.place(x=0, y=125)
+
+        ctk.CTkLabel(self.frame_parados, text="Rastreamento de Lotes sem saída a mais de 90 dias!",
+                     font=("Cascadia Code", 13), text_color="#D3D3D3"
+                     ).place(x=5, y=5)
+        
+        self.lista_parados = ttk.Treeview(self.frame_parados, height=3, column=(
             'id', 'data', 'produto', 'lote', 'medida', 'saída', 
             'estoque', 'valor', 'grupo', 'fornecedor'
         ))
@@ -367,10 +420,10 @@ class TabResumos(FunctionsResumos, Functions):
         
         self.lista_parados.place(y=40, width=970, height=382)
         
-        scrollbar_y = ttk.Scrollbar(self.frame_bottom, 
+        scrollbar_y = ttk.Scrollbar(self.frame_parados, 
                                     orient="vertical", 
                                     command=self.lista_parados.yview)
-        scrollbar_x = ttk.Scrollbar(self.frame_bottom, 
+        scrollbar_x = ttk.Scrollbar(self.frame_parados, 
                                     orient="horizontal", 
                                     command=self.lista_parados.xview)
         self.lista_parados.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)

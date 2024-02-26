@@ -257,7 +257,8 @@ class TabEntradas(FunctionsEntradas, Functions):
         atk.tooltip(btn_clear, "Limpar campos de dados")
 
     def widgets_top(self):
-        self.frame_top = ctk.CTkFrame(self.root, width=990, height=195,)
+        self.frame_top = ctk.CTkFrame(self.root, 
+                                      width=990, height=195,)
         self.frame_top.place(y=45)
 
         ctk.CTkLabel(self.frame_top, text="Código",
@@ -501,14 +502,14 @@ class TabEntradas(FunctionsEntradas, Functions):
                       width=60,
                       font=("Cascadia Code", 13, "bold"),
                       fg_color="#696969",
-                      hover_color=("#D3D3D3", "#363636"),
+                      hover_color=("#D3D3D3", "#1C1C1C"),
                       command=self.search_database).place(x=640, y=50)
         
         ctk.CTkButton(self.frame_bottom, text="LIMPAR",
                       width=60,
                       font=("Cascadia Code", 13, "bold"),
                       fg_color="#696969",
-                      hover_color=("#D3D3D3", "#363636"),
+                      hover_color=("#D3D3D3", "#1C1C1C"),
                       command=self.clear_search).place(x=710, y=50)
         
         ctk.CTkLabel(self.frame_bottom, text="Data", 
@@ -518,12 +519,10 @@ class TabEntradas(FunctionsEntradas, Functions):
         self.data_entrada.place(x=60, y=290)
         
     def view_bottom(self):
-        self.lista_produtos = ttk.Treeview(self.frame_bottom, 
-                                           height=3,
-                                           column=(
-                                               'id', 'produto', 'medida', 'lote', 'estoque', 'mín', 
-                                               'valor', 'fornecedor', 'nf', 'grupo', 'status',
-                                               'data', 'barcode', 'custo', 'revenda', 'ativo'
+        self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
+                                            'id', 'produto', 'medida', 'lote', 'estoque', 'mín', 
+                                            'valor', 'fornecedor', 'nf', 'grupo', 'status',
+                                            'data', 'barcode', 'custo', 'revenda', 'ativo'
                                            ))
         
         self.lista_produtos.heading("#0", text="")

@@ -295,7 +295,9 @@ class TabEstoque(FunctionsEstoque, Functions):
         atk.tooltip(btn_clear, "Limpar campos de dados")
 
     def widgets_top(self):  
-        self.frame_top = ctk.CTkFrame(self.root, width=990, height=200)
+        self.frame_top = ctk.CTkFrame(self.root, 
+                                      width=990, height=200,
+                                      fg_color="#363636")
         self.frame_top.place(y=40)
 
         ctk.CTkLabel(self.frame_top, text="Código", 
