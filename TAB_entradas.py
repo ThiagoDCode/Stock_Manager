@@ -484,7 +484,7 @@ class TabEntradas(FunctionsEntradas, FunctionsExtras):
 
         self.busca = ctk.CTkEntry(self.frame_bottom,
                                   width=350,
-                                  placeholder_text="Produto, Nº Lote, Nota Fiscal",
+                                  placeholder_text="Buscar por Produto, Nº Lote ou Nota Fiscal",
                                   font=("Cascadia Code", 13))
         self.busca.place(x=10, y=50)
 
@@ -600,4 +600,5 @@ class TabEntradas(FunctionsEntradas, FunctionsExtras):
         total_registros = len(self.lista_produtos.get_children())
         ctk.CTkLabel(self.frame_bottom, text=f"Total de Registros: {total_registros}",
                      width=200,
-                     font=("Cascadia Code", 15, "bold")).place(x=750, y=288)
+                     font=("Cascadia Code", 15, "bold")
+                     ).place(x=750, y=288)
