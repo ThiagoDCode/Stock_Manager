@@ -7,7 +7,7 @@ from barcode.writer import ImageWriter
 from random import randint
 
 
-class Functions:
+class FunctionsExtras:
 
     def image_button(self, nameImage, scale=tuple):
         img = ctk.CTkImage(light_image=Image.open("./Stock_Manager/image/" + nameImage),
