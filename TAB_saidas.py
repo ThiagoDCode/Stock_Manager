@@ -40,13 +40,36 @@ class Functions(Database):
         self.min_entry.delete(0, END)
         self.status_entry.delete(0, END)
     
+    def on_doubleClick(self, event):
+        self.clear_entries()
+        
+        for row in self.lista_produtos.selection():
+            c1, c2, c3, c4, c5, c6, c7, c8, \
+                c9, c10, c11, c12, c13, c14, c15 = \
+                    self.lista_produtos.item(row, "values")
+            
+            self.cod_entry.insert(END, c1)
+            self.produto_entry.insert(END, c2)
+            self.nf_entry.insert(END, c3)
+            self.lote_entry.insert(END, c4)
+            self.estoque_entry.insert(END, c6)
+            self.min_entry.insert(END, c7)
+            self.fornecedor_listBox.set(c9)
+            self.grupo_listBox.set(c10)
+            self.status_entry.insert(END, c11)
+            self.data_entry.insert(END, c12)
+            self.barcode_entry.insert(END, c13)
+            self.revenda_entry.insert(END, c14)
+            
+            self.últimas_saídas = c15
+    
     def select_database(self):
         self.lista_produtos.delete(*self.lista_produtos.get_children())
         
         sql = """
             SELECT
-                id, produto, nf, lote, medida, estoque, estoque_mín,
-                valor_estoque, fornecedor, grupo, status
+                id, produto, nf, lote, medida, estoque, estoque_mín, valor_estoque, 
+                fornecedor, grupo, status, data_saída, n_barcode, revenda, saídas
             FROM
                 estoque
         """
@@ -57,6 +80,39 @@ class Functions(Database):
                 self.lista_produtos.insert("", "end", values=dados)
         
         self.total_registros()
+    
+    def save_register(self):
+        self.variables_entries()
+        
+        if self.code == "":
+            messagebox.showerror(
+                "ID invalid", message="Selecione o produto para saída!"
+            )
+        elif self.saída == "" or not self.saída.isdigit():
+            messagebox.showerror(
+                "Invalid input", message="Informe a quantidade de saída!"
+            )
+        
+        else:
+            if self.radio_button_var.get() == 0:
+                messagebox.showerror(
+                    "Invalid input", message="Selecione o tipo de saída: \n  Faturamento \n  Consumo Interno"
+                )
+            else:
+                self.estoque = int(self.estoque) - int(self.saída)
+                
+                sql = """
+                    UPDATE estoque SET
+                        estoque=?, saídas=?, data_saída=?
+                    WHERE
+                        id=?
+                """
+                dados = [self.estoque, self.saída, self.data_saída.get(), 
+                        self.code]
+                self.dml_database(sql, dados)
+            
+            self.clear_entries()
+            self.select_database()
 
 
 class TabSaidas(Functions, FunctionsExtras):
@@ -81,7 +137,7 @@ class TabSaidas(Functions, FunctionsExtras):
                                  compound=LEFT, anchor=NW,
                                  fg_color="transparent",
                                  hover_color=("#D3D3D3", "#4F4F4F"),
-                                 command=None)
+                                 command=self.save_register)
         btn_save.place(x=3, y=3)
         atk.tooltip(btn_save, "Salvar Registro")
 
@@ -96,7 +152,7 @@ class TabSaidas(Functions, FunctionsExtras):
                                   compound=LEFT, anchor=NW,
                                   fg_color="transparent",
                                   hover_color=("#D3D3D3", "#4F4F4F"),
-                                  command=None)
+                                  command=self.clear_entries)
         btn_clear.place(x=57, y=3)
         atk.tooltip(btn_clear, "Limpar campos de dados")
         
@@ -343,7 +399,8 @@ class TabSaidas(Functions, FunctionsExtras):
     def view_bottom(self):
         self.lista_produtos = ttk.Treeview(self.frame_bottom, height=3, column=(
             'id', 'produto', 'nf', 'lote', 'medida', 'estoque', 
-            'mínimo', 'valor', 'fornecedor', 'grupo', 'status'
+            'mínimo', 'valor', 'fornecedor', 'grupo', 'status',
+            'data_saída', 'barcode', 'revenda', 'saídas'
         ))
 
         self.lista_produtos.heading("#0", text="")
@@ -358,6 +415,11 @@ class TabSaidas(Functions, FunctionsExtras):
         self.lista_produtos.heading("fornecedor", text="Fornecedor")
         self.lista_produtos.heading("grupo", text="Departamento")
         self.lista_produtos.heading("status", text="Status")
+        
+        self.lista_produtos.heading("data_saída", text="")
+        self.lista_produtos.heading("barcode", text="")
+        self.lista_produtos.heading("revenda", text="")
+        self.lista_produtos.heading("saídas", text="")
 
         self.lista_produtos.column("#0", width=0, stretch=False)
         self.lista_produtos.column("id", width=35, anchor=CENTER)
@@ -371,7 +433,12 @@ class TabSaidas(Functions, FunctionsExtras):
         self.lista_produtos.column("fornecedor", width=150)
         self.lista_produtos.column("grupo", width=125)
         self.lista_produtos.column("status", width=70, anchor=CENTER)
-
+        
+        self.lista_produtos.column("data_saída", width=0, stretch=False)
+        self.lista_produtos.column("barcode", width=0, stretch=False)
+        self.lista_produtos.column("revenda", width=0, stretch=False)
+        self.lista_produtos.column("saídas", width=0, stretch=False)
+        
         self.lista_produtos.place(y=88, width=970, height=180)
 
         # SCROLLBAR -----------------------------------------------------------------------------------------
@@ -385,6 +452,9 @@ class TabSaidas(Functions, FunctionsExtras):
                                       xscrollcommand=scrollbar_x.set)
         scrollbar_y.place(x=970, y=88, width=20, height=200)
         scrollbar_x.place(x=0, y=268, width=970, height=20)
+        # ---------------------------------------------------------------------------------------------------
+        
+        self.lista_produtos.bind("<Double-1>", self.on_doubleClick)
         
         self.select_database()
         
