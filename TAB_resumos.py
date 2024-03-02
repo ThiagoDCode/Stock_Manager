@@ -71,9 +71,11 @@ class FunctionsResumos(Database):
         data_return = Database().dql_database(query_select)
 
         for dados in data_return:
+            if dados[1] == None or dados[1] == "":
+                continue
+            
             # Busca entradas feitas dentro dos últimos 30 dias
-            ano, mes, dia = int(dados[1][6:]), int(
-                dados[1][3:5]), int(dados[1][:2])
+            ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
             data = date.today() - date(ano, mes, dia)
 
             if data.days <= 30:
@@ -94,9 +96,11 @@ class FunctionsResumos(Database):
         data_return = Database().dql_database(sql)
 
         for dados in data_return:
+            if dados[1] == None or dados[1] == "":
+                continue
+            
             # Busca por saídas feitas a mais de 90 dias
-            ano, mes, dia = int(dados[1][6:]), int(
-                dados[1][3:5]), int(dados[1][:2])
+            ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
             data = date.today() - date(ano, mes, dia)
 
             if data.days >= 90:

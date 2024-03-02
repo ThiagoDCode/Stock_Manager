@@ -51,7 +51,7 @@ class Application:
         self.tabs_view.add("Saídas")
         TabSaidas(self.tabs_view.tab("Saídas"))
 
-        self.tabs_view.set("Saídas",)
+        self.tabs_view.set("Produtos e Estoque",)
 
 
 class WindowConfig(ctk.CTkToplevel):
