@@ -82,19 +82,66 @@ class FunctionsResumos(Database):
     def filter_repor(self, resumo=False):
         query_select = """
             SELECT 
-                id, status, produto, grupo, medida, estoque, estoque_mín, repor, custo, total_custo, fornecedor
+                id, status, produto, grupo, medida, lote, estoque, 
+                estoque_mín, repor, custo, total_custo, fornecedor, n_barcode
             FROM 
-                estoque ORDER BY repor DESC
+                estoque ORDER BY status DESC
         """
         data_return = Database().dql_database(query_select)
 
         for dados in data_return:
-            if dados[5] >= dados[6]:
+            if dados[6] <= dados[7]:
                 if resumo:
                     self.total_repor += 1
                     self.valor_repor += dados[9]
                 else:
                     self.lista_repor.insert("", END, values=dados)
+    
+    def search_repor(self):
+        self.lista_repor.delete(*self.lista_repor.get_children())
+
+        if self.busca.get() == "" \
+            and self.busca_grupo_listBox.get() == "" \
+                and self.busca_status_listBox.get() == "":
+
+            sql = """
+                    SELECT
+                        id, status, produto, grupo, medida, lote, estoque, 
+                        estoque_mín, repor, custo, total_custo, fornecedor, n_barcode
+                    FROM
+                        estoque ORDER BY status DESC
+                """
+        else:
+            if self.busca.get():
+                buscar = f"""
+                    produto LIKE '%{self.busca.get()}%'
+                    OR lote LIKE '%{self.busca.get()}%'
+                    OR n_barcode LIKE '%{self.busca.get()}%'
+                """
+
+            elif self.busca_grupo_listBox.get():
+                buscar = f"grupo LIKE '%{self.busca_grupo_listBox.get()}%' ORDER BY id"
+
+            elif self.busca_status_listBox.get():
+                buscar = f"status LIKE '%{self.busca_status_listBox.get()}%' ORDER BY estoque DESC"
+
+            sql = f"""
+                SELECT
+                    id, status, produto, grupo, medida, lote, estoque,
+                    estoque_mín, repor, custo, total_custo, fornecedor, n_barcode
+                FROM
+                    estoque
+                WHERE
+                    {buscar}
+            """
+
+        data_return = Database().dql_database(sql)
+        if data_return is not None:
+            for dados in data_return:
+                if dados[6] <= dados[7]:
+                    self.lista_repor.insert("", END, values=dados)
+        
+        self.clear_search()
 
     def filter_movimentos(self, resumo=False):
         query_select = """
@@ -384,9 +431,52 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                      font=("Cascadia Code", 13), text_color="#D3D3D3"
                      ).place(x=5, y=5)
 
+        # FILTROS -------------------------------------------------------------------------------
+        ctk.CTkLabel(self.frame_repor, text="Produto",
+                     font=("Cascadia Code", 13)).place(x=5, y=50)
+        self.busca = ctk.CTkEntry(self.frame_repor,
+                                  width=350,
+                                  placeholder_text="Buscar Produto, Nº Lote, Código de Barras",
+                                  font=("Cascadia Code", 13))
+        self.busca.place(x=5, y=75)
+        
+        ctk.CTkLabel(self.frame_repor, text="Departamento",
+                     font=("Cascadia Code", 13)).place(x=365, y=50)
+        lista_grupo = self.dql_database("SELECT grupo FROM estoque", column_names=True)
+        self.busca_grupo_listBox = ctk.CTkComboBox(self.frame_repor, 
+                                                   width=200,
+                                                   values=lista_grupo,
+                                                   font=("Cascadia Code", 13))
+        self.busca_grupo_listBox.set("")
+        self.busca_grupo_listBox.place(x=365, y=75)
+        
+        ctk.CTkLabel(self.frame_repor, text="Status",
+                     font=("Cascadia Code", 13)).place(x=575, y=50)
+        lista_status = ['BAIXO', 'CRÍTICO']
+        self.busca_status_listBox = ctk.CTkComboBox(self.frame_repor, 
+                                                    width=100,
+                                                    values=lista_status,
+                                                    font=("Cascadia Code", 13))
+        self.busca_status_listBox.set("")
+        self.busca_status_listBox.place(x=575, y=75)
+        
+        ctk.CTkButton(self.frame_repor, text="BUSCAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.search_repor).place(x=700, y=75)
+        
+        ctk.CTkButton(self.frame_repor, text="LIMPAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.clear_search).place(x=770, y=75)
+        
         self.lista_repor = ttk.Treeview(self.frame_repor, height=3, column=(
-            'id', 'status', 'produto', 'grupo', 'medida', 'estoque', 
-            'mín', 'repor', 'custo', 'total', 'fornecedor'
+            'id', 'status', 'produto', 'grupo', 'medida', 'lote', 'estoque', 
+            'mín', 'repor', 'custo', 'total', 'fornecedor', 'barcode'
         ))
         self.lista_repor.heading("#0", text="")
         self.lista_repor.heading("id", text="Cód.")
@@ -394,12 +484,14 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.lista_repor.heading("produto", text="Produto")
         self.lista_repor.heading("grupo", text="Departamento")
         self.lista_repor.heading("medida", text="Medida")
+        self.lista_repor.heading("lote", text="Nº Lote")
         self.lista_repor.heading("estoque", text="Estoque")
         self.lista_repor.heading("mín", text="Est.Mín")
         self.lista_repor.heading("repor", text="Repor")
         self.lista_repor.heading("custo", text="Custo Unit.")
         self.lista_repor.heading("total", text="Custo Total")
         self.lista_repor.heading("fornecedor", text="Fornecedor")
+        self.lista_repor.heading("barcode", text="Código de Barras")
 
         self.lista_repor.column("#0", width=0, stretch=False)
         self.lista_repor.column("id", width=35, anchor=CENTER)
@@ -407,12 +499,14 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.lista_repor.column("produto", width=270)
         self.lista_repor.column("grupo", width=125)
         self.lista_repor.column("medida", width=85, anchor=CENTER)
+        self.lista_repor.column("lote", width=50, anchor=CENTER)
         self.lista_repor.column("estoque", width=50, anchor=CENTER)
         self.lista_repor.column("mín", width=50, anchor=CENTER)
         self.lista_repor.column("repor", width=50, anchor=CENTER)
         self.lista_repor.column("custo", width=80, anchor=CENTER)
         self.lista_repor.column("total", width=80, anchor=CENTER)
         self.lista_repor.column("fornecedor", width=150)
+        self.lista_repor.column("barcode", width=100, anchor=CENTER)
 
         self.lista_repor.place(y=110, width=970, height=315)
 
