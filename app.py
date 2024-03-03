@@ -5,6 +5,7 @@ import customtkinter as ctk
 from TAB_resumos import TabResumos
 from TAB_estoque import TabEstoque
 from TAB_entradas import TabEntradas
+from TAB_saidas import TabSaidas
 from con_database import *
 
 
@@ -46,8 +47,11 @@ class Application:
 
         self.tabs_view.add("Entradas")
         TabEntradas(self.tabs_view.tab("Entradas"))
+        
+        self.tabs_view.add("Saídas")
+        TabSaidas(self.tabs_view.tab("Saídas"))
 
-        self.tabs_view.set("Entradas",)
+        self.tabs_view.set("Saídas",)
 
 
 class WindowConfig(ctk.CTkToplevel):
