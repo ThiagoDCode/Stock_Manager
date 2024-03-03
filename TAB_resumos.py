@@ -18,8 +18,11 @@ class FunctionsResumos(Database):
 
     def filter_todos(self, resumo=False):
         query_select = """
-            SELECT id, produto, grupo, medida, estoque, valor_estoque, data_entrada, status
-            FROM estoque
+            SELECT 
+                id, produto, grupo, medida, lote, estoque, 
+                valor_estoque, data_entrada, status, n_barcode
+            FROM 
+                estoque
         """
         data_return = Database().dql_database(query_select)
 
@@ -30,16 +33,63 @@ class FunctionsResumos(Database):
         else:
             for dados in data_return:
                 self.lista_todos.insert("", END, values=dados)
+    
+    def search_todos(self):
+        self.lista_todos.delete(*self.lista_todos.get_children())
+        
+        if self.busca.get() == "" \
+            and self.busca_grupo_listBox.get() == "" \
+                and self.busca_status_listBox.get() == "":
+                
+                sql = """
+                    SELECT
+                        id, produto, grupo, medida, lote, estoque, 
+                        valor_estoque, data_entrada, status, n_barcode
+                    FROM
+                        estoque
+                """
+        else:
+            if self.busca.get():
+                buscar = f"""
+                    produto LIKE '%{self.busca.get()}%'
+                    OR lote LIKE '%{self.busca.get()}%' 
+                    OR n_barcode LIKE '%{self.busca.get()}%'
+                """
+            
+            elif self.busca_grupo_listBox.get():
+                buscar = f"grupo LIKE '%{self.busca_grupo_listBox.get()}%' ORDER BY id"
+            
+            elif self.busca_status_listBox.get():
+                buscar = f"status LIKE '%{self.busca_status_listBox.get()}%' ORDER BY estoque DESC"
+        
+            sql = f"""
+                SELECT
+                    id, produto, grupo, medida, lote, estoque, 
+                    valor_estoque, data_entrada, status, n_barcode
+                FROM
+                    estoque
+                WHERE
+                    {buscar}
+            """
+            
+        data_return = Database().dql_database(sql)
+        if data_return is not None:
+            for dados in data_return:
+                self.lista_todos.insert("", END, values=dados)
+        
+        self.clear_search()
 
     def filter_repor(self, resumo=False):
         query_select = """
-            SELECT id, status, produto, grupo, medida, estoque, estoque_mín, repor, custo, total_custo, fornecedor
-            FROM estoque ORDER BY repor DESC
+            SELECT 
+                id, status, produto, grupo, medida, estoque, estoque_mín, repor, custo, total_custo, fornecedor
+            FROM 
+                estoque ORDER BY repor DESC
         """
         data_return = Database().dql_database(query_select)
 
         for dados in data_return:
-            if dados[7] > 0:
+            if dados[5] >= dados[6]:
                 if resumo:
                     self.total_repor += 1
                     self.valor_repor += dados[9]
@@ -109,6 +159,12 @@ class FunctionsResumos(Database):
                     self.valor_parados += dados[7]
                 else:
                     self.lista_parados.insert("", END, values=dados)
+    
+    def clear_search(self):
+        self.busca.delete(0, END)
+        self.busca.configure(placeholder_text="Buscar Produto, Nº Lote, Código de Barras")
+        self.busca_grupo_listBox.set("")
+        self.busca_status_listBox.set("")
 
 
 class TabResumos(FunctionsResumos, FunctionsExtras):
@@ -130,46 +186,60 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.total_itens = 0
         self.valor_itens = 0
         self.filter_todos(resumo=True)
-        todos = f"TODOS \n{self.total_itens} produtos \nR$ {
-            self.valor_itens:.2f}"
+        todos = f"TODOS \n{self.total_itens} produtos \nR$ {self.valor_itens:.2f}"
 
         self.total_repor = 0
         self.valor_repor = 0
         self.filter_repor(resumo=True)
-        repor = f"REPOR \n{self.total_repor} produtos \nR$ {
-            self.valor_repor:.2f}"
+        repor = f"REPOR \n{self.total_repor} produtos \nR$ {self.valor_repor:.2f}"
 
         self.total_movimentos = 0
         self.valor_faturamento = 0
         # self.filter_movimentos(resumo=True)
-        faturamento = f"FATURAMENTO \n{self.total_movimentos} produtos \nR$ {
-            self.valor_faturamento:.2f}"
+        faturamento = f"FATURAMENTO \n{self.total_movimentos} produtos \nR$ {self.valor_faturamento:.2f}"
 
         self.total_novos = 0
         self.valor_novos = 0
         self.filter_novos(resumo=True)
-        novos = f"NOVOS \n{self.total_novos} produtos \nR$ {
-            self.valor_novos:.2f}"
+        novos = f"NOVOS \n{self.total_novos} produtos \nR$ {self.valor_novos:.2f}"
 
         self.total_parados = 0
         self.valor_parados = 0
         self.filter_parados(resumo=True)
-        parados = f"PARADOS \n{self.total_parados} produtos \nR$ {
-            self.valor_parados:.2f}"
+        parados = f"PARADOS \n{self.total_parados} produtos \nR$ {self.valor_parados:.2f}"
 
-        ctk.CTkButton(self.frame_top, width=175, text=todos, font=("Cascadia Code", 15),
+        ctk.CTkButton(self.frame_top, text=todos,
+                      width=175, 
+                      font=("Cascadia Code", 15),
+                      fg_color="#000080",
                       command=self.views_todos).grid(column=0, row=0)
-        ctk.CTkButton(self.frame_top, width=175, text=repor, font=("Cascadia Code", 15),
+        ctk.CTkButton(self.frame_top, text=repor, 
+                      width=175, 
+                      font=("Cascadia Code", 15, "bold"), text_color="#4F4F4F",
+                      fg_color="#FF4500",
                       command=self.view_repor).grid(column=1, row=0, padx=10)
-        ctk.CTkButton(self.frame_top, width=175, text=faturamento, font=("Cascadia Code", 15),
+        ctk.CTkButton(self.frame_top, text=faturamento, 
+                      width=175, 
+                      font=("Cascadia Code", 15, "bold"), text_color="#4F4F4F",
+                      fg_color="#FFD700",
                       command=self.view_movimentos).grid(column=2, row=0)
-        ctk.CTkButton(self.frame_top, width=175, text=novos, font=("Cascadia Code", 15),
+        ctk.CTkButton(self.frame_top, text=novos, 
+                      width=175, 
+                      font=("Cascadia Code", 15, "bold"), text_color="#4F4F4F",
+                      fg_color="#32CD32",
                       command=self.view_novos).grid(column=3, row=0, padx=10)
-        ctk.CTkButton(self.frame_top, width=175, text=parados, font=("Cascadia Code", 15),
+        ctk.CTkButton(self.frame_top, text=parados, 
+                      width=175, 
+                      font=("Cascadia Code", 15, "bold"), text_color="#4F4F4F",
+                      fg_color="#D8BFD8",
                       command=self.view_parados).grid(column=4, row=0)
 
-        ctk.CTkButton(self.frame_top, image=self.image_button("atualizar.png", (34, 34)), width=50, text="",
-                      compound=LEFT, anchor=NW, fg_color="transparent", hover_color=("#D3D3D3", "#363636"),
+        ctk.CTkButton(self.frame_top, text="",
+                      width=50,
+                      image=self.image_button("atualizar.png", (34, 34)),  
+                      compound=LEFT, anchor=NW, 
+                      fg_color="transparent", 
+                      hover_color=("#D3D3D3", "#363636"),
                       command=self.widgets_top).grid(column=5, row=0, padx=10)
 
     def widgets_bottom(self):
@@ -191,39 +261,116 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                                         fg_color="#363636")
         self.frame_todos.place(x=0, y=125)
 
-        ctk.CTkLabel(self.frame_todos, text="Rastreamento de todos os produtos registrados!",
+        ctk.CTkLabel(self.frame_todos, text="Rastreamento de produtos registrados!",
                      font=("Cascadia Code", 13), text_color="#D3D3D3"
                      ).place(x=5, y=5)
 
+        # FILTROS -------------------------------------------------------------------------------
+        ctk.CTkLabel(self.frame_todos, text="Produto",
+                     font=("Cascadia Code", 13)).place(x=5, y=50)
+        self.busca = ctk.CTkEntry(self.frame_todos,
+                                  width=350,
+                                  placeholder_text="Buscar Produto, Nº Lote, Código de Barras",
+                                  font=("Cascadia Code", 13))
+        self.busca.place(x=5, y=75)
+        
+        ctk.CTkLabel(self.frame_todos, text="Departamento",
+                     font=("Cascadia Code", 13)).place(x=365, y=50)
+        lista_grupo = self.dql_database("SELECT grupo FROM estoque", column_names=True)
+        self.busca_grupo_listBox = ctk.CTkComboBox(self.frame_todos, 
+                                                   width=200,
+                                                   values=lista_grupo,
+                                                   font=("Cascadia Code", 13))
+        self.busca_grupo_listBox.set("")
+        self.busca_grupo_listBox.place(x=365, y=75)
+        
+        ctk.CTkLabel(self.frame_todos, text="Status",
+                     font=("Cascadia Code", 13)).place(x=575, y=50)
+        lista_status = ['OK', 'BAIXO', 'CRÍTICO']
+        self.busca_status_listBox = ctk.CTkComboBox(self.frame_todos, 
+                                                    width=100,
+                                                    values=lista_status,
+                                                    font=("Cascadia Code", 13))
+        self.busca_status_listBox.set("")
+        self.busca_status_listBox.place(x=575, y=75)
+        
+        ctk.CTkLabel(self.frame_todos, text="Data",
+                     font=("Cascadia Code", 13)).place(x=685, y=50)
+        self.busca_mes = ctk.CTkEntry(self.frame_todos,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Mês",
+                                      font=("Cascadia Code", 13))
+        self.busca_mes.place(x=685, y=75)
+        ctk.CTkLabel(self.frame_todos, text="/",
+                     font=("Cascadia Code", 20, "bold"), text_color="#A9A9A9",
+                     ).place(x=735, y=75)
+        self.busca_ano = ctk.CTkEntry(self.frame_todos,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Ano",
+                                      font=("Cascadia Code", 13))
+        self.busca_ano.place(x=748, y=75)
+        
+        ctk.CTkButton(self.frame_todos, text="BUSCAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.search_todos).place(x=820, y=75)
+
+        ctk.CTkButton(self.frame_todos, text="LIMPAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.clear_search).place(x=890, y=75)
+        
+        """lista_movimentos = ['Recentes', 'Crescente', 'Decrescente']
+        self.busca_movimentos_listBox = ctk.CTkComboBox(self.frame_todos, 
+                                                        width=150,
+                                                        values=lista_movimentos,
+                                                        font=("Cascadia Code", 13))
+        self.busca_movimentos_listBox.set("Movimentações")
+        self.busca_movimentos_listBox.place(x=325, y=45)"""
+        # ---------------------------------------------------------------------------------------
+        
         self.lista_todos = ttk.Treeview(self.frame_todos, height=3, column=(
-            'id', 'produto', 'grupo', 'medida', 'estoque', 'valor', 'data', 'status'
+            'id', 'produto', 'grupo', 'medida', 'lote', 
+            'estoque', 'valor', 'data', 'status', 'barcode'
         ))
+        
         self.lista_todos.heading("#0", text="")
         self.lista_todos.heading("id", text="Cód.")
         self.lista_todos.heading("produto", text="Produto")
         self.lista_todos.heading("grupo", text="Departamento")
         self.lista_todos.heading("medida", text="Medida")
+        self.lista_todos.heading("lote", text="Nº Lote")
         self.lista_todos.heading("estoque", text="Estoque")
-        self.lista_todos.heading("valor", text="Valor do Estoque")
-        self.lista_todos.heading("data", text="Últ. Movimento")
+        self.lista_todos.heading("valor", text="Valor Estoque")
+        self.lista_todos.heading("data", text="Últ.Registro")
         self.lista_todos.heading("status", text="Status")
+        self.lista_todos.heading("barcode", text="Código de Barras")
 
         self.lista_todos.column("#0", width=0, stretch=False)
         self.lista_todos.column("id", width=30, anchor=CENTER)
         self.lista_todos.column("produto", width=270)
         self.lista_todos.column("grupo", width=125)
         self.lista_todos.column("medida", width=85, anchor=CENTER)
+        self.lista_todos.column("lote", width=50, anchor=CENTER)
         self.lista_todos.column("estoque", width=50, anchor=CENTER)
         self.lista_todos.column("valor", width=80, anchor=CENTER)
         self.lista_todos.column("data", width=75, anchor=CENTER)
         self.lista_todos.column("status", width=70, anchor=CENTER)
+        self.lista_todos.column("barcode", width=100, anchor=CENTER)
 
-        self.lista_todos.place(y=40, width=970, height=382)
+        self.lista_todos.place(y=110, width=970, height=315)
 
-        scrollbar = ttk.Scrollbar(
-            self.frame_todos, orient="vertical", command=self.lista_todos.yview)
+        scrollbar = ttk.Scrollbar(self.frame_todos, 
+                                  orient="vertical", 
+                                  command=self.lista_todos.yview)
         self.lista_todos.configure(yscrollcommand=scrollbar.set)
-        scrollbar.place(x=970, y=40, width=20, height=382)
+        scrollbar.place(x=970, y=110, width=20, height=315)
 
         self.filter_todos()
 
@@ -238,8 +385,8 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                      ).place(x=5, y=5)
 
         self.lista_repor = ttk.Treeview(self.frame_repor, height=3, column=(
-            'id', 'status', 'produto', 'grupo', 'medida', 'estoque', 'mín', 'repor',
-            'custo', 'total', 'fornecedor'
+            'id', 'status', 'produto', 'grupo', 'medida', 'estoque', 
+            'mín', 'repor', 'custo', 'total', 'fornecedor'
         ))
         self.lista_repor.heading("#0", text="")
         self.lista_repor.heading("id", text="Cód.")
@@ -267,7 +414,7 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.lista_repor.column("total", width=80, anchor=CENTER)
         self.lista_repor.column("fornecedor", width=150)
 
-        self.lista_repor.place(y=40, width=970, height=362)
+        self.lista_repor.place(y=110, width=970, height=315)
 
         scrollbar_y = ttk.Scrollbar(self.frame_repor,
                                     orient="vertical",
@@ -275,10 +422,10 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         scrollbar_x = ttk.Scrollbar(self.frame_repor,
                                     orient="horizontal",
                                     command=self.lista_repor.xview)
-        self.lista_repor.configure(
-            yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
-        scrollbar_y.place(x=970, y=40, width=20, height=382)
-        scrollbar_x.place(x=0, y=401, width=970, height=20)
+        self.lista_repor.configure(yscrollcommand=scrollbar_y.set, 
+                                   xscrollcommand=scrollbar_x.set)
+        scrollbar_y.place(x=970, y=110, width=20, height=315)
+        scrollbar_x.place(x=0, y=405, width=970, height=20)
 
         self.filter_repor()
 
@@ -445,7 +592,3 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         scrollbar_x.place(x=0, y=401, width=970, height=20)
 
         self.filter_parados()
-
-
-if __name__ == "__main__":
-    pass
