@@ -152,13 +152,17 @@ class FunctionsEstoque(Database):
                 
                 query_sql = """
                     UPDATE estoque SET
-                        produto=?, grupo=?, medida=?, lote=?, fornecedor=?, responsável=?,
-                        estoque=?, estoque_mín=?, custo=?, revenda=?, data_entrada=?, n_barcode=?, ativo=?
+                        produto=?, grupo=?, medida=?, lote=?, fornecedor=?, responsável=?, estoque=?, 
+                        estoque_mín=?, custo=?, revenda=?, data_entrada=?, entradas=?, n_barcode=?, ativo=?
                     WHERE id=?
                 """
-                lista_dados = [self.produto, self.grupo, self.medida, self.lote, self.fornecedor,
-                               self.gestor, self.estoque, self.min,
-                               self.custo, self.revenda, self.data, self.barcode, self.ativo,
+                
+                if self.estoque == "":
+                    self.estoque = 0
+                
+                lista_dados = [self.produto, self.grupo, self.medida, self.lote, self.fornecedor, 
+                               self.gestor, self.estoque, self.min, self.custo, self.revenda, 
+                               self.data, self.estoque, self.barcode, self.ativo,
                                self.código]
 
                 if messagebox.askyesno("Update", message="Atualizar Registro?"):
@@ -217,7 +221,7 @@ class FunctionsEstoque(Database):
             data_query = f"""
                         SELECT
                             id, data_entrada, produto, medida, grupo, fornecedor, lote, estoque, estoque_mín,
-                            status, responsável, custo, revenda, n_barcode
+                            status, responsável, custo, revenda, n_barcode, ativo
                         FROM
                             estoque WHERE {target} LIKE '%{busca}%' ORDER BY produto ASC
                         """
@@ -259,21 +263,18 @@ class TabEstoque(FunctionsEstoque, FunctionsExtras):
         btn_search = ctk.CTkButton(self.frame_buttons, text="",
                                    width=30,
                                    corner_radius=3,
-                                   image=self.image_button(
-                                       "search.png", (26, 26)),
+                                   image=self.image_button("search.png", (26, 26)),
                                    compound=LEFT, anchor=NW,
                                    fg_color="transparent",
                                    hover_color=("#D3D3D3", "#4F4F4F"),
                                    command=self.search_database)
         btn_search.place(x=42, y=2)
-        atk.tooltip(
-            btn_search, "Buscar Registro \n (Busca por: produto/departamento/fornecedor/lote/NF)")
+        atk.tooltip(btn_search, "Buscar Registro \n (Busca por: produto/departamento/fornecedor/lote/NF)")
 
         btn_update = ctk.CTkButton(self.frame_buttons, text="",
                                    width=30,
                                    corner_radius=3,
-                                   image=self.image_button(
-                                       "update.png", (26, 26)),
+                                   image=self.image_button("update.png", (26, 26)),
                                    compound=LEFT, anchor=NW,
                                    fg_color="transparent",
                                    hover_color=("#D3D3D3", "#4F4F4F"),
@@ -284,8 +285,7 @@ class TabEstoque(FunctionsEstoque, FunctionsExtras):
         btn_delete = ctk.CTkButton(self.frame_buttons, text="",
                                    width=30,
                                    corner_radius=3,
-                                   image=self.image_button(
-                                       "delete.png", (26, 26)),
+                                   image=self.image_button("delete.png", (26, 26)),
                                    compound=LEFT, anchor=NW,
                                    fg_color="transparent",
                                    hover_color=("#D3D3D3", "#4F4F4F"),
@@ -300,8 +300,7 @@ class TabEstoque(FunctionsEstoque, FunctionsExtras):
         btn_clear = ctk.CTkButton(self.frame_buttons, text="",
                                   width=30,
                                   corner_radius=3,
-                                  image=self.image_button(
-                                      "clear-entries.png", (26, 26)),
+                                  image=self.image_button("clear-entries.png", (26, 26)),
                                   compound=LEFT, anchor=NW,
                                   fg_color="transparent",
                                   hover_color=("#D3D3D3", "#4F4F4F"),
@@ -393,7 +392,7 @@ class TabEstoque(FunctionsEstoque, FunctionsExtras):
                      font=("Cascadia Code", 13)
                      ).place(x=5, y=115)
         self.gestor_listBox = ctk.CTkComboBox(self.frame_top,
-                                                  width=180,
+                                                  width=170,
                                                   values=lista_gestor,
                                                   font=("Cascadia Code", 13))
         self.gestor_listBox.set("")
