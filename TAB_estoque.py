@@ -122,6 +122,10 @@ class FunctionsEstoque(Database):
 
             if self.estoque == "":
                 self.estoque = 0
+            if self.custo == "":
+                self.custo = 0
+            if self.revenda == "":
+                self.revenda = 0
                 
             lista_dados = [self.produto, self.grupo, self.medida, self.fornecedor,
                            self.gestor, self.lote, self.estoque, self.min, self.custo, 
@@ -159,6 +163,10 @@ class FunctionsEstoque(Database):
                 
                 if self.estoque == "":
                     self.estoque = 0
+                if self.custo == "":
+                    self.custo = 0
+                if self.revenda == "":
+                    self.revenda = 0
                 
                 lista_dados = [self.produto, self.grupo, self.medida, self.lote, self.fornecedor, 
                                self.gestor, self.estoque, self.min, self.custo, self.revenda, 

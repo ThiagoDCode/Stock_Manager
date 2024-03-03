@@ -127,6 +127,12 @@ class FunctionsEntradas(Database):
                         fornecedor=?, lote=?, medida=?, estoque=?, custo=?, revenda=?, data_entrada=?, responsável=?
                     WHERE id=?
                 """
+                
+                if self.custo == "":
+                    self.custo = 0
+                if self.revenda == "":
+                    self.revenda = 0
+                
                 dados = [self.fornecedor, self.lote, self.medida, add_estoque, 
                          self.custo, self.revenda, self.data_entrada.get(), self.gestor,
                          self.code]
