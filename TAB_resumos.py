@@ -188,9 +188,6 @@ class FunctionsResumos(Database):
             elif self.busca_grupo_listBox.get():
                 buscar = f"grupo LIKE '%{self.busca_grupo_listBox.get()}%' ORDER BY id"
 
-            elif self.busca_status_listBox.get():
-                buscar = f"status LIKE '%{self.busca_status_listBox.get()}%' ORDER BY estoque DESC"
-
             sql = f"""
                 SELECT
                     id, data_saída, produto, grupo, medida, lote, 
@@ -211,8 +208,11 @@ class FunctionsResumos(Database):
     
     def filter_novos(self, resumo=False):
         query_select = """
-                SELECT id, data_entrada, produto, medida, lote, entradas, custo, custo_total, estoque, status, grupo, fornecedor
-                FROM estoque ORDER BY data_entrada DESC
+                SELECT 
+                    id, data_entrada, produto, medida, lote, entradas, 
+                    custo, custo_total, estoque, status, grupo, fornecedor
+                FROM 
+                    estoque ORDER BY data_entrada DESC
             """
         data_return = Database().dql_database(query_select)
 
@@ -230,6 +230,56 @@ class FunctionsResumos(Database):
                     self.valor_novos += dados[7]
                 else:
                     self.lista_novos.insert("", END, values=dados)
+    
+    def search_novos(self):
+        self.lista_novos.delete(*self.lista_novos.get_children())
+
+        if self.busca.get() == "" \
+            and self.busca_grupo_listBox.get() == "" \
+                and self.busca_status_listBox.get() == "":
+
+            sql = """
+                    SELECT
+                        id, data_entrada, produto, medida, lote, entradas, 
+                        custo, custo_total, estoque, status, grupo, fornecedor
+                    FROM
+                        estoque ORDER BY data_entrada DESC
+                """
+        else:
+            if self.busca.get():
+                buscar = f"""
+                    produto LIKE '%{self.busca.get()}%'
+                    OR lote LIKE '%{self.busca.get()}%'
+                    OR n_barcode LIKE '%{self.busca.get()}%'
+                """
+
+            elif self.busca_grupo_listBox.get():
+                buscar = f"grupo LIKE '%{self.busca_grupo_listBox.get()}%' ORDER BY id"
+
+            sql = f"""
+                SELECT
+                    id, data_entrada, produto, medida, lote, entradas,
+                    custo, custo_total, estoque, status, grupo, fornecedor
+                FROM
+                    estoque
+                WHERE
+                    {buscar}
+            """
+
+        data_return = Database().dql_database(sql)
+        if data_return is not None:
+            for dados in data_return:
+                if dados[1] == None or dados[1] == "":
+                    continue
+            
+                # Busca entradas feitas dentro dos últimos 30 dias
+                ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
+                data = date.today() - date(ano, mes, dia)
+
+                if data.days <= 30:
+                    self.lista_novos.insert("", END, values=dados)
+
+        self.clear_search()
 
     def filter_parados(self, resumo=False):
         sql = """
@@ -429,14 +479,6 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                       fg_color="#696969",
                       hover_color=("#D3D3D3", "#1C1C1C"),
                       command=self.clear_search).place(x=890, y=75)
-        
-        """lista_movimentos = ['Recentes', 'Crescente', 'Decrescente']
-        self.busca_movimentos_listBox = ctk.CTkComboBox(self.frame_todos, 
-                                                        width=150,
-                                                        values=lista_movimentos,
-                                                        font=("Cascadia Code", 13))
-        self.busca_movimentos_listBox.set("Movimentações")
-        self.busca_movimentos_listBox.place(x=325, y=45)"""
         # ---------------------------------------------------------------------------------------
         
         self.lista_todos = ttk.Treeview(self.frame_todos, height=3, column=(
@@ -530,6 +572,7 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                       fg_color="#696969",
                       hover_color=("#D3D3D3", "#1C1C1C"),
                       command=self.clear_search).place(x=770, y=75)
+        # ---------------------------------------------------------------------------------------
         
         self.lista_repor = ttk.Treeview(self.frame_repor, height=3, column=(
             'id', 'status', 'produto', 'grupo', 'medida', 'lote', 'estoque', 
@@ -576,7 +619,7 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.lista_repor.configure(yscrollcommand=scrollbar_y.set, 
                                    xscrollcommand=scrollbar_x.set)
         scrollbar_y.place(x=970, y=110, width=20, height=315)
-        scrollbar_x.place(x=0, y=405, width=970, height=20)
+        scrollbar_x.place(x=0, y=410, width=970, height=15)
 
         self.filter_repor()
 
@@ -650,6 +693,7 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                       fg_color="#696969",
                       hover_color=("#D3D3D3", "#1C1C1C"),
                       command=self.clear_search).place(x=907, y=75)
+        # ---------------------------------------------------------------------------------------
         
         self.lista_faturamento = ttk.Treeview(self.frame_faturamento, height=3, column=(
             'id', 'data', 'produto', 'grupo', 'medida', 'lote', 'estoque', 
@@ -697,17 +741,69 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                                         fg_color="#363636")
         self.frame_novos.place(x=0, y=125)
 
-        ctk.CTkLabel(self.frame_novos, text="Registros e entradas feitas nos últimos 30 dias!",
+        ctk.CTkLabel(self.frame_novos, text="Registros de entradas feitas nos últimos 30 dias!",
                      font=("Cascadia Code", 13), text_color="#D3D3D3"
                      ).place(x=5, y=5)
 
+        # FILTROS -------------------------------------------------------------------------------
+        ctk.CTkLabel(self.frame_novos, text="Produto",
+                     font=("Cascadia Code", 13)).place(x=5, y=50)
+        self.busca = ctk.CTkEntry(self.frame_novos,
+                                  width=350,
+                                  placeholder_text="Buscar Produto, Nº Lote, Código de Barras",
+                                  font=("Cascadia Code", 13))
+        self.busca.place(x=5, y=75)
+
+        ctk.CTkLabel(self.frame_novos, text="Departamento",
+                     font=("Cascadia Code", 13)).place(x=365, y=50)
+        lista_grupo = self.dql_database("SELECT grupo FROM estoque", column_names=True)
+        self.busca_grupo_listBox = ctk.CTkComboBox(self.frame_novos,
+                                                   width=200,
+                                                   values=lista_grupo,
+                                                   font=("Cascadia Code", 13))
+        self.busca_grupo_listBox.set("")
+        self.busca_grupo_listBox.place(x=365, y=75)
+        
+        ctk.CTkLabel(self.frame_novos, text="Data",
+                     font=("Cascadia Code", 13)).place(x=575, y=50)
+        self.busca_mes = ctk.CTkEntry(self.frame_novos,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Mês",
+                                      font=("Cascadia Code", 13))
+        self.busca_mes.place(x=575, y=75)
+        ctk.CTkLabel(self.frame_novos, text="/",
+                     font=("Cascadia Code", 20, "bold"), text_color="#A9A9A9",
+                     ).place(x=625, y=75)
+        self.busca_ano = ctk.CTkEntry(self.frame_novos,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Ano",
+                                      font=("Cascadia Code", 13))
+        self.busca_ano.place(x=638, y=75)
+
+        ctk.CTkButton(self.frame_novos, text="BUSCAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.search_novos).place(x=710, y=75)
+
+        ctk.CTkButton(self.frame_novos, text="LIMPAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.clear_search).place(x=780, y=75)
+        # ---------------------------------------------------------------------------------------
+        
         self.lista_novos = ttk.Treeview(self.frame_novos, height=3, column=(
             'id', 'data', 'produto', 'medida', 'lote', 'entrada', 'custo',
             'total', 'estoque', 'status', 'grupo', 'fornecedor'
         ))
         self.lista_novos.heading("#0", text="")
         self.lista_novos.heading("id", text="Cód.")
-        self.lista_novos.heading("data", text="Últ. Entrada")
+        self.lista_novos.heading("data", text="Data Registro")
         self.lista_novos.heading("produto", text="Produto")
         self.lista_novos.heading("medida", text="Medida")
         self.lista_novos.heading("lote", text="Nº Lote")
@@ -721,7 +817,7 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
 
         self.lista_novos.column("#0", width=0, stretch=False)
         self.lista_novos.column("id", width=35, anchor=CENTER)
-        self.lista_novos.column("data", width=75, anchor=CENTER)
+        self.lista_novos.column("data", width=80, anchor=CENTER)
         self.lista_novos.column("produto", width=270)
         self.lista_novos.column("medida", width=85, anchor=CENTER)
         self.lista_novos.column("lote", width=60, anchor=CENTER)
@@ -733,7 +829,7 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.lista_novos.column("grupo", width=125)
         self.lista_novos.column("fornecedor", width=150)
 
-        self.lista_novos.place(y=40, width=970, height=362)
+        self.lista_novos.place(y=110, width=970, height=315)
 
         scrollbar_y = ttk.Scrollbar(self.frame_novos,
                                     orient="vertical",
@@ -741,10 +837,10 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         scrollbar_x = ttk.Scrollbar(self.frame_novos,
                                     orient="horizontal",
                                     command=self.lista_novos.xview)
-        self.lista_novos.configure(
-            yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
-        scrollbar_y.place(x=970, y=40, width=20, height=382)
-        scrollbar_x.place(x=0, y=401, width=970, height=20)
+        self.lista_novos.configure(yscrollcommand=scrollbar_y.set, 
+                                   xscrollcommand=scrollbar_x.set)
+        scrollbar_y.place(x=970, y=110, width=20, height=315)
+        scrollbar_x.place(x=0, y=410, width=970, height=15)
 
         self.filter_novos()
 
