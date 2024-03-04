@@ -305,6 +305,56 @@ class FunctionsResumos(Database):
                     self.valor_parados += dados[7]
                 else:
                     self.lista_parados.insert("", END, values=dados)
+                    
+    def search_parados(self):
+        self.lista_parados.delete(*self.lista_parados.get_children())
+
+        if self.busca.get() == "" \
+            and self.busca_grupo_listBox.get() == "" \
+                and self.busca_status_listBox.get() == "":
+
+            sql = """
+                    SELECT
+                        id, data_saída, produto, lote, medida, saídas, 
+                        estoque, valor_estoque, grupo, fornecedor
+                    FROM
+                        estoque ORDER BY data_saída DESC
+                """
+        else:
+            if self.busca.get():
+                buscar = f"""
+                    produto LIKE '%{self.busca.get()}%'
+                    OR lote LIKE '%{self.busca.get()}%'
+                    OR n_barcode LIKE '%{self.busca.get()}%'
+                """
+
+            elif self.busca_grupo_listBox.get():
+                buscar = f"grupo LIKE '%{self.busca_grupo_listBox.get()}%' ORDER BY id"
+
+            sql = f"""
+                SELECT
+                    id, data_saída, produto, lote, medida, saídas, 
+                    estoque, valor_estoque, grupo, fornecedor
+                FROM
+                    estoque
+                WHERE
+                    {buscar}
+            """
+
+        data_return = Database().dql_database(sql)
+        if data_return is not None:
+            for dados in data_return:
+                if dados[1] == None or dados[1] == "":
+                    continue
+            
+                # Busca por saídas feitas a mais de 90 dias
+                ano, mes, dia = int(dados[1][6:]), int(dados[1][3:5]), int(dados[1][:2])
+                data = date.today() - date(ano, mes, dia)
+
+                if data.days >= 90:
+                    self.lista_parados.insert("", END, values=dados)
+
+        self.clear_search()
     
     def clear_search(self):
         try:
@@ -854,13 +904,65 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                      font=("Cascadia Code", 13), text_color="#D3D3D3"
                      ).place(x=5, y=5)
 
+        # FILTROS -------------------------------------------------------------------------------
+        ctk.CTkLabel(self.frame_parados, text="Produto",
+                     font=("Cascadia Code", 13)).place(x=5, y=50)
+        self.busca = ctk.CTkEntry(self.frame_parados,
+                                  width=350,
+                                  placeholder_text="Buscar Produto, Nº Lote, Código de Barras",
+                                  font=("Cascadia Code", 13))
+        self.busca.place(x=5, y=75)
+
+        ctk.CTkLabel(self.frame_parados, text="Departamento",
+                     font=("Cascadia Code", 13)).place(x=365, y=50)
+        lista_grupo = self.dql_database("SELECT grupo FROM estoque", column_names=True)
+        self.busca_grupo_listBox = ctk.CTkComboBox(self.frame_parados,
+                                                   width=200,
+                                                   values=lista_grupo,
+                                                   font=("Cascadia Code", 13))
+        self.busca_grupo_listBox.set("")
+        self.busca_grupo_listBox.place(x=365, y=75)
+
+        ctk.CTkLabel(self.frame_parados, text="Data",
+                     font=("Cascadia Code", 13)).place(x=575, y=50)
+        self.busca_mes = ctk.CTkEntry(self.frame_parados,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Mês",
+                                      font=("Cascadia Code", 13))
+        self.busca_mes.place(x=575, y=75)
+        ctk.CTkLabel(self.frame_parados, text="/",
+                     font=("Cascadia Code", 20, "bold"), text_color="#A9A9A9",
+                     ).place(x=625, y=75)
+        self.busca_ano = ctk.CTkEntry(self.frame_parados,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Ano",
+                                      font=("Cascadia Code", 13))
+        self.busca_ano.place(x=638, y=75)
+
+        ctk.CTkButton(self.frame_parados, text="BUSCAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.search_parados).place(x=710, y=75)
+
+        ctk.CTkButton(self.frame_parados, text="LIMPAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.clear_search).place(x=780, y=75)
+        # ---------------------------------------------------------------------------------------
+        
         self.lista_parados = ttk.Treeview(self.frame_parados, height=3, column=(
             'id', 'data', 'produto', 'lote', 'medida', 'saída',
             'estoque', 'valor', 'grupo', 'fornecedor'
         ))
         self.lista_parados.heading("#0", text="")
         self.lista_parados.heading("id", text="Cód.")
-        self.lista_parados.heading("data", text="Últ. Saída")
+        self.lista_parados.heading("data", text="Data Saída")
         self.lista_parados.heading("produto", text="Produto")
         self.lista_parados.heading("lote", text="Nº Lote")
         self.lista_parados.heading("medida", text="Medida")
@@ -882,7 +984,7 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.lista_parados.column("grupo", width=125)
         self.lista_parados.column("fornecedor", width=150)
 
-        self.lista_parados.place(y=40, width=970, height=382)
+        self.lista_parados.place(y=110, width=970, height=315)
 
         scrollbar_y = ttk.Scrollbar(self.frame_parados,
                                     orient="vertical",
@@ -890,9 +992,9 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         scrollbar_x = ttk.Scrollbar(self.frame_parados,
                                     orient="horizontal",
                                     command=self.lista_parados.xview)
-        self.lista_parados.configure(
-            yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
-        scrollbar_y.place(x=970, y=40, width=20, height=382)
-        scrollbar_x.place(x=0, y=401, width=970, height=20)
+        self.lista_parados.configure(yscrollcommand=scrollbar_y.set, 
+                                     xscrollcommand=scrollbar_x.set)
+        scrollbar_y.place(x=970, y=110, width=20, height=315)
+        scrollbar_x.place(x=0, y=410, width=970, height=15)
 
         self.filter_parados()
