@@ -29,7 +29,7 @@ class FunctionsResumos(Database):
         if resumo:
             self.total_itens = len(data_return)
             for dados in data_return:
-                self.valor_itens += dados[5]
+                self.valor_itens += dados[6]
         else:
             for dados in data_return:
                 self.lista_todos.insert("", END, values=dados)
@@ -143,23 +143,72 @@ class FunctionsResumos(Database):
         
         self.clear_search()
 
-    def filter_movimentos(self, resumo=False):
+    def filter_faturamento(self, resumo=False):
         query_select = """
-            SELECT id, produto, medida, estoque, valor_estoque, entradas, saídas, custo, revenda, status, data_entrada, faturamento
-            FROM estoque ORDER BY data_entrada DESC
+            SELECT 
+                id, data_saída, produto, grupo, medida, lote, 
+                estoque, saídas, revenda, faturamento, status
+            FROM 
+                estoque ORDER BY data_saída DESC
         """
         data_return = Database().dql_database(query_select)
 
         if resumo:
             for dados in data_return:
-                if dados[5] > 0 or dados[6] > 0:
+                if dados[7] > 0:
                     self.total_movimentos += 1
-                    self.valor_faturamento += dados[11]
+                    self.valor_faturamento += dados[9]
         else:
             for dados in data_return:
-                if dados[5] > 0 or dados[6] > 0:
-                    self.lista_movimentos.insert("", END, values=dados)
+                if dados[7] > 0:
+                    self.lista_faturamento.insert("", END, values=dados)
 
+    def search_faturamento(self):
+        self.lista_faturamento.delete(*self.lista_faturamento.get_children())
+
+        if self.busca.get() == "" \
+            and self.busca_grupo_listBox.get() == "" \
+                and self.busca_status_listBox.get() == "":
+
+            sql = """
+                    SELECT
+                        id, data_saída, produto, grupo, medida, lote, 
+                        estoque, saídas, revenda, faturamento, status
+                    FROM
+                        estoque ORDER BY data_saída DESC
+                """
+        else:
+            if self.busca.get():
+                buscar = f"""
+                    produto LIKE '%{self.busca.get()}%'
+                    OR lote LIKE '%{self.busca.get()}%'
+                    OR n_barcode LIKE '%{self.busca.get()}%'
+                """
+
+            elif self.busca_grupo_listBox.get():
+                buscar = f"grupo LIKE '%{self.busca_grupo_listBox.get()}%' ORDER BY id"
+
+            elif self.busca_status_listBox.get():
+                buscar = f"status LIKE '%{self.busca_status_listBox.get()}%' ORDER BY estoque DESC"
+
+            sql = f"""
+                SELECT
+                    id, data_saída, produto, grupo, medida, lote, 
+                    estoque, saídas, revenda, faturamento, status
+                FROM
+                    estoque
+                WHERE
+                    {buscar}
+            """
+
+        data_return = Database().dql_database(sql)
+        if data_return is not None:
+            for dados in data_return:
+                if dados[7] > 0:
+                    self.lista_faturamento.insert("", END, values=dados)
+
+        self.clear_search()
+    
     def filter_novos(self, resumo=False):
         query_select = """
                 SELECT id, data_entrada, produto, medida, lote, entradas, custo, custo_total, estoque, status, grupo, fornecedor
@@ -208,10 +257,18 @@ class FunctionsResumos(Database):
                     self.lista_parados.insert("", END, values=dados)
     
     def clear_search(self):
-        self.busca.delete(0, END)
-        self.busca.configure(placeholder_text="Buscar Produto, Nº Lote, Código de Barras")
-        self.busca_grupo_listBox.set("")
-        self.busca_status_listBox.set("")
+        try:
+            self.busca.delete(0, END)
+            self.busca.configure(placeholder_text="Buscar Produto, Nº Lote, Código de Barras")
+            self.busca_grupo_listBox.set("")
+            self.busca_status_listBox.set("")
+            self.busca_mes.delete(0, END)
+            self.busca_mes.configure(placeholder_text="Mês")
+            self.busca_ano.delete(0, END)
+            self.busca_ano.configure(placeholder_text="Ano")
+            self.busca_faturamento.set("")
+        except:
+            pass
 
 
 class TabResumos(FunctionsResumos, FunctionsExtras):
@@ -233,27 +290,27 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.total_itens = 0
         self.valor_itens = 0
         self.filter_todos(resumo=True)
-        todos = f"TODOS \n{self.total_itens} produtos \nR$ {self.valor_itens:.2f}"
+        todos = f"TODOS \n{self.total_itens} produtos\nR$ {self.valor_itens:.2f}"
 
         self.total_repor = 0
         self.valor_repor = 0
         self.filter_repor(resumo=True)
-        repor = f"REPOR \n{self.total_repor} produtos \nR$ {self.valor_repor:.2f}"
+        repor = f"REPOR \n{self.total_repor} produtos\nR$ {self.valor_repor:.2f}"
 
         self.total_movimentos = 0
         self.valor_faturamento = 0
-        # self.filter_movimentos(resumo=True)
-        faturamento = f"FATURAMENTO \n{self.total_movimentos} produtos \nR$ {self.valor_faturamento:.2f}"
+        self.filter_faturamento(resumo=True)
+        faturamento = f"FATURAMENTO \n{self.total_movimentos} produtos\nR$ {self.valor_faturamento:.2f}"
 
         self.total_novos = 0
         self.valor_novos = 0
         self.filter_novos(resumo=True)
-        novos = f"NOVOS \n{self.total_novos} produtos \nR$ {self.valor_novos:.2f}"
+        novos = f"NOVOS \n{self.total_novos} produtos\nR$ {self.valor_novos:.2f}"
 
         self.total_parados = 0
         self.valor_parados = 0
         self.filter_parados(resumo=True)
-        parados = f"PARADOS \n{self.total_parados} produtos \nR$ {self.valor_parados:.2f}"
+        parados = f"PARADOS \n{self.total_parados} produtos\nR$ {self.valor_parados:.2f}"
 
         ctk.CTkButton(self.frame_top, text=todos,
                       width=175, 
@@ -269,7 +326,7 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                       width=175, 
                       font=("Cascadia Code", 15, "bold"), text_color="#4F4F4F",
                       fg_color="#FFD700",
-                      command=self.view_movimentos).grid(column=2, row=0)
+                      command=self.view_faturamento).grid(column=2, row=0)
         ctk.CTkButton(self.frame_top, text=novos, 
                       width=175, 
                       font=("Cascadia Code", 15, "bold"), text_color="#4F4F4F",
@@ -523,59 +580,116 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
 
         self.filter_repor()
 
-    def view_movimentos(self):
-        self.frame_movimentos = ctk.CTkFrame(self.root,
+    def view_faturamento(self):
+        self.frame_faturamento = ctk.CTkFrame(self.root,
                                              width=990, height=425,
                                              fg_color="#363636")
-        self.frame_movimentos.place(x=0, y=125)
+        self.frame_faturamento.place(x=0, y=125)
 
-        ctk.CTkLabel(self.frame_movimentos, text="...",
+        ctk.CTkLabel(self.frame_faturamento, text="Registros de saídas feitas nos últimos 30 dias!",
                      font=("Cascadia Code", 13), text_color="#D3D3D3"
                      ).place(x=5, y=5)
 
-        self.lista_movimentos = ttk.Treeview(self.frame_movimentos, height=3, column=(
-            'id', 'produto', 'medida', 'estoque', 'valor', 'entradas', 'saídas', 'custo',
-            'revenda', 'status', 'data', 'faturamento'
+        # FILTROS -------------------------------------------------------------------------------
+        ctk.CTkLabel(self.frame_faturamento, text="Produto",
+                     font=("Cascadia Code", 13)).place(x=5, y=50)
+        self.busca = ctk.CTkEntry(self.frame_faturamento,
+                                  width=350,
+                                  placeholder_text="Buscar Produto, Nº Lote, Código de Barras",
+                                  font=("Cascadia Code", 13))
+        self.busca.place(x=5, y=75)
+
+        ctk.CTkLabel(self.frame_faturamento, text="Departamento",
+                     font=("Cascadia Code", 13)).place(x=365, y=50)
+        lista_grupo = self.dql_database("SELECT grupo FROM estoque", column_names=True)
+        self.busca_grupo_listBox = ctk.CTkComboBox(self.frame_faturamento,
+                                                   width=200,
+                                                   values=lista_grupo,
+                                                   font=("Cascadia Code", 13))
+        self.busca_grupo_listBox.set("")
+        self.busca_grupo_listBox.place(x=365, y=75)
+        
+        ctk.CTkLabel(self.frame_faturamento, text="Saídas",
+                     font=("Cascadia Code", 13)).place(x=575, y=50)
+        lista_faturamento = ["Maior Valor", "Menor Valor", "Maior Qtd", "Menor Qtd"]
+        self.busca_faturamento = ctk.CTkComboBox(self.frame_faturamento,
+                                                 width=125,
+                                                 values=lista_faturamento,
+                                                 font=("Cascadia Code", 13))
+        self.busca_faturamento.set("")
+        self.busca_faturamento.place(x=575, y=75)
+
+        ctk.CTkLabel(self.frame_faturamento, text="Data",
+                     font=("Cascadia Code", 13)).place(x=705, y=50)
+        self.busca_mes = ctk.CTkEntry(self.frame_faturamento,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Mês",
+                                      font=("Cascadia Code", 13))
+        self.busca_mes.place(x=710, y=75)
+        ctk.CTkLabel(self.frame_faturamento, text="/",
+                     font=("Cascadia Code", 20, "bold"), text_color="#A9A9A9",
+                     ).place(x=760, y=75)
+        self.busca_ano = ctk.CTkEntry(self.frame_faturamento,
+                                      width=50,
+                                      justify=CENTER,
+                                      placeholder_text="Ano",
+                                      font=("Cascadia Code", 13))
+        self.busca_ano.place(x=773, y=75)
+
+        ctk.CTkButton(self.frame_faturamento, text="BUSCAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.search_faturamento).place(x=837, y=75)
+
+        ctk.CTkButton(self.frame_faturamento, text="LIMPAR",
+                      width=60,
+                      font=("Cascadia Code", 13, "bold"),
+                      fg_color="#696969",
+                      hover_color=("#D3D3D3", "#1C1C1C"),
+                      command=self.clear_search).place(x=907, y=75)
+        
+        self.lista_faturamento = ttk.Treeview(self.frame_faturamento, height=3, column=(
+            'id', 'data', 'produto', 'grupo', 'medida', 'lote', 'estoque', 
+            'saídas', 'revenda', 'faturamento', 'status'
         ))
-        self.lista_movimentos.heading("#0", text="")
-        self.lista_movimentos.heading("id", text="Registro")
-        self.lista_movimentos.heading("produto", text="Produto")
-        self.lista_movimentos.heading("medida", text="Medida")
-        self.lista_movimentos.heading("estoque", text="Estoque")
-        self.lista_movimentos.heading("valor", text="Valor do Estoque")
-        self.lista_movimentos.heading("entradas", text="Entradas")
-        self.lista_movimentos.heading("saídas", text="Saídas")
-        self.lista_movimentos.heading("custo", text="Valor de Entrada")
-        self.lista_movimentos.heading("revenda", text="Valor de Saída")
-        self.lista_movimentos.heading("status", text="Status")
+        self.lista_faturamento.heading("#0", text="")
+        self.lista_faturamento.heading("id", text="Cód.")
+        self.lista_faturamento.heading("data", text="Data Saída")
+        self.lista_faturamento.heading("produto", text="Produto")
+        self.lista_faturamento.heading("grupo", text="Departamento")
+        self.lista_faturamento.heading("medida", text="Medida")
+        self.lista_faturamento.heading("lote", text="Nº Lote")
+        self.lista_faturamento.heading("estoque", text="Estoque")
+        self.lista_faturamento.heading("saídas", text="Saídas")
+        self.lista_faturamento.heading("revenda", text="Valor Saída")
+        self.lista_faturamento.heading("faturamento", text="Faturamento")
+        self.lista_faturamento.heading("status", text="Status")
 
-        self.lista_movimentos.heading("data", text="")
-        self.lista_movimentos.heading("faturamento", text="")
+        self.lista_faturamento.column("#0", width=0, stretch=False)
+        self.lista_faturamento.column("id", width=30, anchor=CENTER)
+        self.lista_faturamento.column("data", width=75, anchor=CENTER)
+        self.lista_faturamento.column("produto", width=270)
+        self.lista_faturamento.column("grupo", width=125)
+        self.lista_faturamento.column("medida", width=85, anchor=CENTER)
+        self.lista_faturamento.column("lote", width=50, anchor=CENTER)
+        self.lista_faturamento.column("estoque", width=50, anchor=CENTER)
+        self.lista_faturamento.column("saídas", width=50, anchor=CENTER)
+        self.lista_faturamento.column("revenda", width=80, anchor=CENTER)
+        self.lista_faturamento.column("faturamento", width=80, anchor=CENTER)
+        self.lista_faturamento.column("status", width=70, anchor=CENTER)
 
-        self.lista_movimentos.column("#0", width=0, stretch=False)
-        self.lista_movimentos.column("id", width=50)
-        self.lista_movimentos.column("produto", width=270)
-        self.lista_movimentos.column("medida", width=85)
-        self.lista_movimentos.column("estoque", width=50)
-        self.lista_movimentos.column("valor", width=90)
-        self.lista_movimentos.column("entradas", width=50)
-        self.lista_movimentos.column("saídas", width=50)
-        self.lista_movimentos.column("custo", width=87)
-        self.lista_movimentos.column("revenda", width=75)
-        self.lista_movimentos.column("status", width=75)
+        self.lista_faturamento.place(y=110, width=970, height=315)
 
-        self.lista_movimentos.column("data", width=0, stretch=False)
-        self.lista_movimentos.column("faturamento", width=0, stretch=False)
-
-        self.lista_movimentos.place(y=40, width=970, height=382)
-
-        scrollbar = ttk.Scrollbar(self.frame_movimentos,
+        scrollbar = ttk.Scrollbar(self.frame_faturamento,
                                   orient="vertical",
-                                  command=self.lista_movimentos.yview)
-        self.lista_movimentos.configure(yscrollcommand=scrollbar.set)
-        scrollbar.place(x=970, y=40, width=20, height=382)
+                                  command=self.lista_faturamento.yview)
+        self.lista_faturamento.configure(yscrollcommand=scrollbar.set)
+        scrollbar.place(x=970, y=110, width=20, height=315)
 
-        # self.filter_movimentos()
+        self.filter_faturamento()
 
     def view_novos(self):
         self.frame_novos = ctk.CTkFrame(self.root,
