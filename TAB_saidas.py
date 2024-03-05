@@ -10,6 +10,7 @@ from functions_base import *
 
 
 class Functions(Database):
+    
     def variables_entries(self):
         self.code = self.cod_entry.get()
         self.data = self.data_entry.get()

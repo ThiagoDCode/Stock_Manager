@@ -376,7 +376,6 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
         self.root = root
 
         self.widgets_top()
-        # self.widgets_bottom()
         self.views_todos()
 
     def widgets_top(self):
@@ -445,19 +444,6 @@ class TabResumos(FunctionsResumos, FunctionsExtras):
                       fg_color="transparent", 
                       hover_color=("#D3D3D3", "#363636"),
                       command=self.widgets_top).grid(column=5, row=0, padx=10)
-
-    def widgets_bottom(self):
-        pass
-        # self.frame_bottom = ctk.CTkFrame(self.root, width=990, height=425, border_width=1, border_color="#000")
-        # self.frame_bottom.place(x=0, y=125)
-
-        # ctk.CTkLabel(self.frame_bottom, text="Produto", font=("Cascadia Code", 13)).place(x=5, y=5)
-        # self.produto_search = ctk.CTkEntry(self.frame_bottom, width=250, font=("Cascadia Code", 13))
-        # self.produto_search.place(x=65, y=5)
-
-        # ctk.CTkLabel(self.frame_bottom, text="Status", font=("Cascadia Code", 13)).place(x=325, y=5)
-        # self.status_search = ctk.CTkEntry(self.frame_bottom, width=125, font=("Cascadia Code", 13))
-        # self.status_search.place(x=378, y=5)
 
     def views_todos(self):
         self.frame_todos = ctk.CTkFrame(self.root,
