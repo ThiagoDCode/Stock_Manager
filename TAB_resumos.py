@@ -20,7 +20,7 @@ class FunctionsResumos(Database):
         query_select = """
             SELECT 
                 id, produto, grupo, medida, lote, estoque, 
-                valor_estoque, data_entrada, status, n_barcode
+                valor_estoque, data_entrada, status, barcode
             FROM 
                 estoque
         """
@@ -44,7 +44,7 @@ class FunctionsResumos(Database):
                 sql = """
                     SELECT
                         id, produto, grupo, medida, lote, estoque, 
-                        valor_estoque, data_entrada, status, n_barcode
+                        valor_estoque, data_entrada, status, barcode
                     FROM
                         estoque
                 """
@@ -53,7 +53,7 @@ class FunctionsResumos(Database):
                 buscar = f"""
                     produto LIKE '%{self.busca.get()}%'
                     OR lote LIKE '%{self.busca.get()}%' 
-                    OR n_barcode LIKE '%{self.busca.get()}%'
+                    OR barcode LIKE '%{self.busca.get()}%'
                 """
             
             elif self.busca_grupo_listBox.get():
@@ -65,7 +65,7 @@ class FunctionsResumos(Database):
             sql = f"""
                 SELECT
                     id, produto, grupo, medida, lote, estoque, 
-                    valor_estoque, data_entrada, status, n_barcode
+                    valor_estoque, data_entrada, status, barcode
                 FROM
                     estoque
                 WHERE
@@ -83,7 +83,7 @@ class FunctionsResumos(Database):
         query_select = """
             SELECT 
                 id, status, produto, grupo, medida, lote, estoque, 
-                estoque_mín, repor, custo, total_custo, fornecedor, n_barcode
+                estoque_mín, repor, custo_unit, custo_repor, fornecedor, barcode
             FROM 
                 estoque ORDER BY status DESC
         """
@@ -107,7 +107,7 @@ class FunctionsResumos(Database):
             sql = """
                     SELECT
                         id, status, produto, grupo, medida, lote, estoque, 
-                        estoque_mín, repor, custo, total_custo, fornecedor, n_barcode
+                        estoque_mín, repor, custo_unit, custo_repor, fornecedor, barcode
                     FROM
                         estoque ORDER BY status DESC
                 """
@@ -116,7 +116,7 @@ class FunctionsResumos(Database):
                 buscar = f"""
                     produto LIKE '%{self.busca.get()}%'
                     OR lote LIKE '%{self.busca.get()}%'
-                    OR n_barcode LIKE '%{self.busca.get()}%'
+                    OR barcode LIKE '%{self.busca.get()}%'
                 """
 
             elif self.busca_grupo_listBox.get():
@@ -128,7 +128,7 @@ class FunctionsResumos(Database):
             sql = f"""
                 SELECT
                     id, status, produto, grupo, medida, lote, estoque,
-                    estoque_mín, repor, custo, total_custo, fornecedor, n_barcode
+                    estoque_mín, repor, custo_unit, custo_repor, fornecedor, barcode
                 FROM
                     estoque
                 WHERE
@@ -147,7 +147,7 @@ class FunctionsResumos(Database):
         query_select = """
             SELECT 
                 id, data_saída, produto, grupo, medida, lote, 
-                estoque, saídas, revenda, faturamento, status
+                estoque, saídas, valor_venda, faturamento, status
             FROM 
                 estoque ORDER BY data_saída DESC
         """
@@ -173,7 +173,7 @@ class FunctionsResumos(Database):
             sql = """
                     SELECT
                         id, data_saída, produto, grupo, medida, lote, 
-                        estoque, saídas, revenda, faturamento, status
+                        estoque, saídas, valor_venda, faturamento, status
                     FROM
                         estoque ORDER BY data_saída DESC
                 """
@@ -182,7 +182,7 @@ class FunctionsResumos(Database):
                 buscar = f"""
                     produto LIKE '%{self.busca.get()}%'
                     OR lote LIKE '%{self.busca.get()}%'
-                    OR n_barcode LIKE '%{self.busca.get()}%'
+                    OR barcode LIKE '%{self.busca.get()}%'
                 """
 
             elif self.busca_grupo_listBox.get():
@@ -191,7 +191,7 @@ class FunctionsResumos(Database):
             sql = f"""
                 SELECT
                     id, data_saída, produto, grupo, medida, lote, 
-                    estoque, saídas, revenda, faturamento, status
+                    estoque, saídas, valor_venda, faturamento, status
                 FROM
                     estoque
                 WHERE
@@ -210,7 +210,7 @@ class FunctionsResumos(Database):
         query_select = """
                 SELECT 
                     id, data_entrada, produto, medida, lote, entradas, 
-                    custo, custo_total, estoque, status, grupo, fornecedor
+                    custo_unit, custo_total, estoque, status, grupo, fornecedor
                 FROM 
                     estoque ORDER BY data_entrada DESC
             """
@@ -241,7 +241,7 @@ class FunctionsResumos(Database):
             sql = """
                     SELECT
                         id, data_entrada, produto, medida, lote, entradas, 
-                        custo, custo_total, estoque, status, grupo, fornecedor
+                        custo_unit, custo_total, estoque, status, grupo, fornecedor
                     FROM
                         estoque ORDER BY data_entrada DESC
                 """
@@ -250,7 +250,7 @@ class FunctionsResumos(Database):
                 buscar = f"""
                     produto LIKE '%{self.busca.get()}%'
                     OR lote LIKE '%{self.busca.get()}%'
-                    OR n_barcode LIKE '%{self.busca.get()}%'
+                    OR barcode LIKE '%{self.busca.get()}%'
                 """
 
             elif self.busca_grupo_listBox.get():
@@ -259,7 +259,7 @@ class FunctionsResumos(Database):
             sql = f"""
                 SELECT
                     id, data_entrada, produto, medida, lote, entradas,
-                    custo, custo_total, estoque, status, grupo, fornecedor
+                    custo_unit, custo_total, estoque, status, grupo, fornecedor
                 FROM
                     estoque
                 WHERE
@@ -325,7 +325,7 @@ class FunctionsResumos(Database):
                 buscar = f"""
                     produto LIKE '%{self.busca.get()}%'
                     OR lote LIKE '%{self.busca.get()}%'
-                    OR n_barcode LIKE '%{self.busca.get()}%'
+                    OR barcode LIKE '%{self.busca.get()}%'
                 """
 
             elif self.busca_grupo_listBox.get():

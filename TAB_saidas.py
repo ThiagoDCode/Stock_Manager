@@ -84,7 +84,7 @@ class Functions(Database):
         sql = """
             SELECT
                 id, produto, lote, medida, estoque, estoque_mín, valor_estoque, fornecedor, 
-                grupo, status, data_saída, n_barcode, revenda, saídas, responsável, ativo
+                grupo, status, data_saída, barcode, valor_venda, saídas, responsável, ativo
             FROM
                 estoque
         """
@@ -112,13 +112,13 @@ class Functions(Database):
                 query_select = f"""
                             SELECT
                                 id, produto, lote, medida, estoque, estoque_mín, valor_estoque, fornecedor, 
-                                grupo, status, data_saída, n_barcode, revenda, saídas, responsável, ativo
+                                grupo, status, data_saída, barcode, valor_venda, saídas, responsável, ativo
                             FROM
                                 estoque
                             WHERE
                                 produto LIKE '%{busca}%'
                                 OR lote LIKE '%{busca}%'
-                                OR n_barcode LIKE '%{busca}%'
+                                OR barcode LIKE '%{busca}%'
                                 ORDER BY produto ASC
                             """
 
@@ -129,7 +129,7 @@ class Functions(Database):
                 query_select = f"""
                             SELECT
                                 id, produto, lote, medida, estoque, estoque_mín, valor_estoque, fornecedor,
-                                grupo, status, data_saída, n_barcode, revenda, saídas, responsável, ativo
+                                grupo, status, data_saída, barcode, valor_venda, saídas, responsável, ativo
                             FROM
                                 estoque
                             WHERE

@@ -63,7 +63,7 @@ class FunctionsEstoque(Database):
         query_select = """
             SELECT 
                 id, data_entrada, produto, medida, grupo, fornecedor, lote, estoque, estoque_mín, 
-                status, responsável, custo, revenda, n_barcode, ativo
+                status, responsável, custo_unit, valor_venda, barcode, ativo
             FROM estoque
         """
 
@@ -116,7 +116,7 @@ class FunctionsEstoque(Database):
             query_sql = """
                 INSERT INTO estoque (
                     produto, grupo, medida, fornecedor, responsável, lote, estoque, 
-                    estoque_mín, custo, revenda, data_entrada, entradas, n_barcode, ativo
+                    estoque_mín, custo_unit, valor_venda, data_entrada, entradas, barcode, ativo
                     )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
 
@@ -159,7 +159,7 @@ class FunctionsEstoque(Database):
                 query_sql = """
                     UPDATE estoque SET
                         produto=?, grupo=?, medida=?, lote=?, fornecedor=?, responsável=?, estoque=?, 
-                        estoque_mín=?, custo=?, revenda=?, data_entrada=?, entradas=?, n_barcode=?, ativo=?
+                        estoque_mín=?, custo_unit=?, valor_venda=?, data_entrada=?, entradas=?, barcode=?, ativo=?
                     WHERE id=?
                 """
                 
@@ -233,7 +233,7 @@ class FunctionsEstoque(Database):
             data_query = f"""
                         SELECT
                             id, data_entrada, produto, medida, grupo, fornecedor, lote, estoque, estoque_mín,
-                            status, responsável, custo, revenda, n_barcode, ativo
+                            status, responsável, custo_unit, valor_venda, barcode, ativo
                         FROM
                             estoque WHERE {target} LIKE '%{busca}%' ORDER BY produto ASC
                         """

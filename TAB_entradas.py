@@ -67,7 +67,7 @@ class FunctionsEntradas(Database):
             SELECT 
                 id, produto, medida, lote, estoque, estoque_mín, 
                 valor_estoque, fornecedor, grupo, status, data_entrada, 
-                n_barcode, custo, revenda, ativo, responsável
+                barcode, custo_unit, valor_venda, ativo, responsável
             FROM 
                 estoque
         """
@@ -124,7 +124,7 @@ class FunctionsEntradas(Database):
 
                 query_update = """
                     UPDATE estoque SET
-                        fornecedor=?, lote=?, medida=?, estoque=?, custo=?, revenda=?, data_entrada=?, responsável=?
+                        fornecedor=?, lote=?, medida=?, estoque=?, custo_unit=?, valor_venda=?, data_entrada=?, responsável=?
                     WHERE id=?
                 """
                 
@@ -162,13 +162,13 @@ class FunctionsEntradas(Database):
                             SELECT
                                 id, produto, medida, lote, estoque, estoque_mín,
                                 valor_estoque, fornecedor, grupo, status, data_entrada,
-                                n_barcode, custo, revenda, ativo, responsável
+                                barcode, custo_unit, valor_venda, ativo, responsável
                             FROM
                                 estoque
                             WHERE
                                 produto LIKE '%{busca}%'
                                 OR lote LIKE '%{busca}%'
-                                OR n_barcode LIKE '%{busca}%'
+                                OR barcode LIKE '%{busca}%'
                                 ORDER BY produto ASC
                             """
 
@@ -180,7 +180,7 @@ class FunctionsEntradas(Database):
                             SELECT
                                 id, produto, medida, lote, estoque, estoque_mín,
                                 valor_estoque, fornecedor, grupo, status, data_entrada,
-                                n_barcode, custo, revenda, ativo, responsável
+                                barcode, custo_unit, valor_venda, ativo, responsável
                             FROM
                                 estoque
                             WHERE
